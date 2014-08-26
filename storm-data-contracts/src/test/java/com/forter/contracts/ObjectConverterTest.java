@@ -20,11 +20,9 @@ public class ObjectConverterTest {
     @Test
     public void testJsonNodeToObjectMissingOptionalValue() throws IOException {
         ObjectNode node = (ObjectNode) mapper.readTree("{\"x\":\"-1\"}");
-        MockInput somePOJO = new MockInput();
-        somePOJO.y = Optional.absent();
-        assertThat(somePOJO.x).isNull();
-        ContractConverter.instance().updateObjectNodeToContract(node, somePOJO);
-        assertThat(somePOJO.x).isEqualTo(-1);
-        assertThat(somePOJO.y.isPresent()).isFalse();
+        ContractFactory<MockInput> factory = new ContractFactory(MockInput.class);
+        MockInput input = ContractConverter.instance().convertObjectNodeToContract(node, factory);
+        assertThat(input.x).isEqualTo(-1);
+        assertThat(input.y.isPresent()).isFalse();
     }
 }

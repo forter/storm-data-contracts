@@ -38,7 +38,11 @@ public class ContractConverter {
         mapper.registerModule(new GuavaModule());
     }
 
-    public <T> T updateObjectNodeToContract(ObjectNode node, T defaultValues) {
+    public <T> T convertObjectNodeToContract(ObjectNode node, ContractFactory<T> factory) {
+        return updateObjectNodeToContract(node,factory.newInstance());
+    }
+
+    private <T> T updateObjectNodeToContract(ObjectNode node, T defaultValues) {
         try {
             return mapper
                     .readerForUpdating(defaultValues)
@@ -48,12 +52,16 @@ public class ContractConverter {
         }
     }
 
-    public <T> T updateContractToContract(Object contract, T defaultValues) {
+    public <T> T convertContractToContract(Object contract, ContractFactory<T> factory) {
+        return updateContractToContract(contract, factory.newInstance());
+    }
+
+    private <T> T updateContractToContract(Object contract, T defaultValues) {
         ObjectNode node = convertContractToObjectNode(contract);
         return updateObjectNodeToContract(node, defaultValues);
     }
 
-    public ObjectNode convertContractToObjectNode(Object contract) {
+    private ObjectNode convertContractToObjectNode(Object contract) {
         if (contract instanceof ValidContract) {
             contract = ((ValidContract) contract).getContract();
         }

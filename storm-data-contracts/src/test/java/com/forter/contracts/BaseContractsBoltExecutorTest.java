@@ -62,28 +62,32 @@ public class BaseContractsBoltExecutorTest {
         runMockOptionalContractsBoltTest(input, output);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testNullOutput() {
         //passing false to this mock returns null
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         IContractsBolt contractsBolt = new MockContractsBolt(false);
-        execute(data, contractsBolt);
+        OutputCollector collector = execute(data, contractsBolt);
+        assertEmitException(collector, NullPointerException.class);
+
     }
 
-    @Test(expectedExceptions = ValidationException.class)
+    @Test
     public void testNullOptionalOutput() {
         //passing false to this mock returns null
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         IContractsBolt contractsBolt = new MockNullOptionalContractsBolt();
-        execute(data, contractsBolt);
+        OutputCollector collector = execute(data, contractsBolt);
+        assertEmitException(collector, NullPointerException.class);
     }
     
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void testInvalidOutput() {
         //optionalInput2 must be at most 10 and mock copies input to output resulting in invalid output
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":100}");
         IContractsBolt contractsBolt = new MockContractsBolt(true);
-        execute(data, contractsBolt);
+        OutputCollector collector = execute(data, contractsBolt);
+        assertEmitException(collector, IllegalStateException.class);
     }
 
     @Test
@@ -141,10 +145,6 @@ public class BaseContractsBoltExecutorTest {
         assertEmitEquals(collector, expectedOutput);
     }
 
-    private void assertNumberOfEmits(OutputCollector collector, int times) {
-        verify(collector, times(times)).emit((String)any(), (Tuple)any(), (List<Object>) any());
-    }
-
     private OutputCollector execute(ObjectNode input, IContractsBolt bolt) {
         BaseContractsBoltExecutor baseContractsBoltExecutor = new BaseContractsBoltExecutor(bolt);
         OutputCollector collector = mock(OutputCollector.class);
@@ -157,9 +157,22 @@ public class BaseContractsBoltExecutorTest {
         return collector;
     }
 
+
+    private void assertNumberOfEmits(OutputCollector collector, int times) {
+        verify(collector, times(times)).emit((String)any(), (Tuple)any(), (List<Object>) any());
+        verify(collector).ack((Tuple)any());
+    }
+
+    private void assertEmitException(OutputCollector collector, Class<? extends Exception> exceptionClass) {
+        ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
+        verify(collector).reportError(any(exceptionClass));
+        verify(collector).fail((Tuple)any());
+    }
+
     private void assertEmitEquals(OutputCollector collector, Object expectedOutput) {
         ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
         verify(collector).emit((String)any(), (Tuple)any(), actualOutput.capture());
+        verify(collector).ack((Tuple)any());
         List<Object> emittedObjects = (List<Object>) actualOutput.getValue();
         Object actual = ((ValidContract)emittedObjects.get(1)).getContract();
         String actualString =  ReflectionToStringBuilder.toString(actual,

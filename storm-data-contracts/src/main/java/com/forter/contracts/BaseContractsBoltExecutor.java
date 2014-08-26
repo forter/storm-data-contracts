@@ -64,16 +64,19 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private TOutput delegateExecution(final Object data) {
         TInput input;
         ContractValidationResult<TInput> inputViolations = null;
-        Object contract = null;
+        Object contract;
         if (data instanceof ValidContract) {
             contract = ((ValidContract) data).getContract();
-            inputViolations = new ContractValidationResult();
+            if (isOfTypeInput(contract)) {
+                //optimization, skip validation if already validated for the same type
+                inputViolations = new ContractValidationResult();
+            }
         }
         else {
             contract = data;
         }
 
-        input = transformInput(data, contract);
+        input = transformInput(contract);
 
         if (inputViolations == null) {
             inputViolations = validatedInput(input);
@@ -89,25 +92,24 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         return output;
     }
 
-    private TInput transformInput(Object data, Object contract) {
+    private boolean isOfTypeInput(Object contract) {
+        return reflector.getInputClass().equals(contract.getClass());
+    }
 
-        if (reflector.getInputClass().equals(contract.getClass())) {
+    /**
+     * Override to support different input formats.
+     */
+    private TInput transformInput(Object contract) {
+
+        if (isOfTypeInput(contract)) {
             return (TInput) contract;
         }
         else if (contract instanceof ObjectNode) {
-            return convertObjectNodeToContract((ObjectNode) contract);
+            return ContractConverter.instance().convertObjectNodeToContract((ObjectNode) contract, inputFactory);
         }
         else {
-            return convertContractToContract(data);
+            return ContractConverter.instance().convertContractToContract(contract, inputFactory);
         }
-    }
-
-    private TInput convertContractToContract(Object data) {
-        return ContractConverter.instance().updateContractToContract(data, inputFactory.newInstance());
-    }
-
-    private TInput convertObjectNodeToContract(ObjectNode data) {
-        return ContractConverter.instance().updateObjectNodeToContract(data, inputFactory.newInstance());
     }
 
     private ContractValidationResult<TInput> validatedInput(TInput input) {
@@ -150,13 +152,6 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
      */
     protected Object transformOutput(Object output) {
         return new ValidContract(output);
-    }
-
-    /**
-     * Override this method to provide different output formats.
-     */
-    protected Object transformInput(Object input) {
-        return input;
     }
 
     private void validateOutput(Object output) {

@@ -93,8 +93,7 @@ public class TestDataProvider {
     }
 
     private static Object createAndValidateContract(ObjectNode node, ContractFactory<?> factory) {
-        Object contract = factory.newInstance();
-        ContractConverter.instance().updateObjectNodeToContract(node, contract);
+        Object contract = ContractConverter.instance().convertObjectNodeToContract(node, factory);
         validate(contract);
         return contract;
     }
