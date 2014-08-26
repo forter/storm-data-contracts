@@ -91,7 +91,19 @@ public class MyBoltTest {
 }
 ```
 
-Bolt Inputs
+Adding Bolt into a Topology
+---------------------------
+```
+// Using Storm's TopologyBuilder
+TopologyBuilder builder = new TopologBuilder();
+builder.setBolt("myContractsBolt",new BaseContractsBoltExecutor(new MyContractsBolt()))
+
+// Using com.forter.monitoring.MonitoredTopologyBuilder
+MonitoredTopologyBuilder builder = new MonitoredTopologBuilder();
+builder.registerRichBolt(IContractsBolt.class, BaseContractsBoltExecutor.class);
+builder.setBolt("myContractsBolt",new MyContractsBolt());
+```
+input
 -----------
 Bolt expects a pair tuple (such as [id, data]). 
 The second item of the pair is expected to be one of the following:
