@@ -11,7 +11,7 @@ import java.io.IOException;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
- * Unit Tests for {@link com.forter.contracts.ObjectNodeConverter}
+ * Unit Tests for {@link ContractConverter}
  */
 public class ObjectConverterTest {
 
@@ -23,7 +23,7 @@ public class ObjectConverterTest {
         MockInput somePOJO = new MockInput();
         somePOJO.y = Optional.absent();
         assertThat(somePOJO.x).isNull();
-        ObjectNodeConverter.instance().updateObjectNodeToContract(node, somePOJO);
+        ContractConverter.instance().updateObjectNodeToContract(node, somePOJO);
         assertThat(somePOJO.x).isEqualTo(-1);
         assertThat(somePOJO.y.isPresent()).isFalse();
     }

@@ -3,10 +3,10 @@ package com.forter.contracts;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.forter.contracts.validation.ValidContract;
 import com.google.common.base.Throwables;
 
 import java.util.Map;
@@ -14,19 +14,19 @@ import java.util.Map;
 /**
  * Converts {@link com.fasterxml.jackson.databind.node.ObjectNode} to a Contract
  */
-public class ObjectNodeConverter {
+public class ContractConverter {
 
     private static class LazyHolder {
-        private static final ObjectNodeConverter INSTANCE = new ObjectNodeConverter();
+        private static final ContractConverter INSTANCE = new ContractConverter();
     }
 
-    public static ObjectNodeConverter instance() {
+    public static ContractConverter instance() {
         return LazyHolder.INSTANCE;
     }
 
     private final ObjectMapper mapper;
 
-    private ObjectNodeConverter() {
+    private ContractConverter() {
         mapper = new ObjectMapper();
         mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
@@ -54,10 +54,16 @@ public class ObjectNodeConverter {
     }
 
     public ObjectNode convertContractToObjectNode(Object contract) {
+        if (contract instanceof ValidContract) {
+            contract = ((ValidContract) contract).getContract();
+        }
         return mapper.valueToTree(contract);
     }
 
     public Map convertContractToMap(Object contract) {
+        if (contract instanceof ValidContract) {
+            contract = ((ValidContract) contract).getContract();
+        }
         return mapper.convertValue(contract, Map.class);
     }
 }

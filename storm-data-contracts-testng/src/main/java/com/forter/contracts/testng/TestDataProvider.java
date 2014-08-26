@@ -1,14 +1,13 @@
 package com.forter.contracts.testng;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.forter.contracts.ContractConverter;
 import com.forter.contracts.ContractFactory;
-import com.forter.contracts.ObjectNodeConverter;
 import com.forter.contracts.validation.ContractValidationResult;
 import com.forter.contracts.validation.ContractValidator;
 import com.google.common.base.Function;
@@ -95,7 +94,7 @@ public class TestDataProvider {
 
     private static Object createAndValidateContract(ObjectNode node, ContractFactory<?> factory) {
         Object contract = factory.newInstance();
-        ObjectNodeConverter.instance().updateObjectNodeToContract(node, contract);
+        ContractConverter.instance().updateObjectNodeToContract(node, contract);
         validate(contract);
         return contract;
     }

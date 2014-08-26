@@ -3,7 +3,6 @@ package com.forter.contracts;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.*;
-import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
@@ -100,11 +99,11 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     }
 
     private TInput convertContractToContract(Object data) {
-        return ObjectNodeConverter.instance().updateContractToContract((ObjectNode) data, inputFactory.newInstance());
+        return ContractConverter.instance().updateContractToContract((ObjectNode) data, inputFactory.newInstance());
     }
 
     private TInput convertObjectNodeToContract(ObjectNode data) {
-        return ObjectNodeConverter.instance().updateObjectNodeToContract((ObjectNode) data, inputFactory.newInstance());
+        return ContractConverter.instance().updateObjectNodeToContract((ObjectNode) data, inputFactory.newInstance());
     }
 
     private ContractValidationResult<TInput> validatedInput(TInput input) {
@@ -146,7 +145,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
      * Override this method to provide different output formats.
      */
     protected Object transformOutput(Object output) {
-        return output;
+        return new ValidContract(output);
     }
 
     private void validateOutput(Object output) {
