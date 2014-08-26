@@ -2,11 +2,11 @@ package com.forter.contracts;
 
 import backtype.storm.task.TopologyContext;
 import backtype.storm.task.OutputCollector;
-import backtype.storm.topology.ReportedFailedException;
 import backtype.storm.tuple.Tuple;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.forter.contracts.mocks.*;
+import com.forter.contracts.validation.ValidContract;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
@@ -14,6 +14,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class BaseContractsBoltExecutorTest {
         runMockOptionalContractsBoltTest(input, output);
     }
 
-    @Test(expectedExceptions = ReportedFailedException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void testNullOutput() {
         //passing false to this mock returns null
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
@@ -69,7 +70,7 @@ public class BaseContractsBoltExecutorTest {
         execute(data, contractsBolt);
     }
 
-    @Test(expectedExceptions = ReportedFailedException.class)
+    @Test(expectedExceptions = ValidationException.class)
     public void testNullOptionalOutput() {
         //passing false to this mock returns null
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
@@ -77,7 +78,7 @@ public class BaseContractsBoltExecutorTest {
         execute(data, contractsBolt);
     }
     
-    @Test(expectedExceptions = ReportedFailedException.class)
+    @Test(expectedExceptions = IllegalStateException.class)
     public void testInvalidOutput() {
         //optionalInput2 must be at most 10 and mock copies input to output resulting in invalid output
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":100}");
@@ -160,7 +161,7 @@ public class BaseContractsBoltExecutorTest {
         ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
         verify(collector).emit((String)any(), (Tuple)any(), actualOutput.capture());
         List<Object> emittedObjects = (List<Object>) actualOutput.getValue();
-        Object actual = emittedObjects.get(1);
+        Object actual = ((ValidContract)emittedObjects.get(1)).getContract();
         String actualString =  ReflectionToStringBuilder.toString(actual,
                 ToStringStyle.SHORT_PREFIX_STYLE, false, false);
         String expectedString =  ReflectionToStringBuilder.toString(expectedOutput,
