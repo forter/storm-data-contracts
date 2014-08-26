@@ -99,7 +99,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     /**
      * Override to support different input formats.
      */
-    private TInput transformInput(Object contract) {
+    protected TInput transformInput(Object contract) {
 
         if (isOfTypeInput(contract)) {
             return (TInput) contract;
