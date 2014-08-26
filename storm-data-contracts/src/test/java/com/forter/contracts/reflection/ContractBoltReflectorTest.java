@@ -40,4 +40,10 @@ public class ContractBoltReflectorTest {
     public void testMissingUnwrapAnnotation() {
         new ContractBoltReflector(new MockMissingUnwrapBolt());
     }
+
+    @Test
+    public void testOutputFields() {
+        ContractBoltReflector reflector = new ContractBoltReflector(new MockContractsBolt());
+        assertThat(reflector.getOutputFields()).containsExactly("output1","optionalOutput2");
+    }
 }

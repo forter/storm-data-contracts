@@ -1,9 +1,11 @@
 package com.forter.contracts.reflection;
 
 import com.forter.contracts.IContractsBolt;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import org.hibernate.validator.valuehandling.UnwrapValidatedValue;
@@ -14,6 +16,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Reflects on types and annotations of {@link com.forter.contracts.IContractsBolt} implementations.
@@ -21,10 +24,10 @@ import java.util.Collection;
 public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> {
 
     private final TContractsBolt bolt;
-
     public enum EXECUTE_RETURN_TYPE {NOT_NULL_CONTRACT, OPTIONAL_CONTRACT, COLLECTION_CONTRACTS};
     private EXECUTE_RETURN_TYPE executeReturnType;
     private Class<TInput> inputClass;
+    private Class<TOutput> outputClass;
 
     public ContractBoltReflector(TContractsBolt bolt) {
         this.bolt = bolt;
@@ -52,12 +55,15 @@ public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends ICont
                     checkAnnotations(returnClass);
                     if (Collection.class.isAssignableFrom(returnClass)) {
                         executeReturnType = EXECUTE_RETURN_TYPE.COLLECTION_CONTRACTS;
+                        outputClass = (Class<TOutput>) (returnType.resolveType(Collection.class.getTypeParameters()[0]).getRawType());
                     }
                     else if (Optional.class.isAssignableFrom(returnClass)) {
                         executeReturnType = EXECUTE_RETURN_TYPE.OPTIONAL_CONTRACT;
+                        outputClass = (Class<TOutput>) (returnType.resolveType(Optional.class.getTypeParameters()[0]).getRawType());
                     }
                     else {
                         executeReturnType = EXECUTE_RETURN_TYPE.NOT_NULL_CONTRACT;
+                        outputClass = (Class<TOutput>) returnClass;
                     }
                     break;
                 }
@@ -93,6 +99,17 @@ public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends ICont
 
     private Iterable<? extends Annotation> getAnnotationsOfClass(Field field, Class<? extends Annotation> annotationClass) {
         return Iterables.filter(Arrays.asList(field.getDeclaredAnnotations()), annotationClass);
+    }
+
+    public Set<String> getOutputFields() {
+        return Sets.newLinkedHashSet(
+            Iterables.transform(Arrays.asList(outputClass.getFields()),new Function<Field,String>() {
+
+                @Override
+                public String apply(Field input) {
+                    return input.getName();
+                }
+            }));
     }
 
 }

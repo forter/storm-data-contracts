@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Bolt base class that uses Data Objects for input and output.
@@ -167,5 +168,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     @Override
     public Map<String, Object> getComponentConfiguration() {
         return null;
+    }
+
+    public Set<String> getOutputFields() {
+        return reflector.getOutputFields();
     }
 }
