@@ -11,7 +11,7 @@ deploy:
     secret_access_key:
       secure: "SjJwI2E+as1GLbjhT4OqOCPCSRKSngnZA6EkOyHInURQEOZwOvNJRocriomdAkkGYnVF87Yj6Jj6jik0voT5bPhq0PwKPxOEd8xmIuByUEK24yFo5QncATUSOXT5ETT5yuD2aV6jFz/bF2C65PSDNiV/GikGcwkHs2fHI1Cpwu8="
     bucket: oss.forter.com
-    local-dir: /home/travis/.m2/repository/com/forter/storm-data-contractsi-parent/
+    local-dir: /home/travis/.m2/repository/com/forter/storm-data-contracts-parent/
     upload-dir: repository/com/forter/storm-data-contracts-parent
     skip_cleanup: true
     on:
