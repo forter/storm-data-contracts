@@ -44,10 +44,16 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
     @Override
     public void execute(Tuple tuple) {
-        final Object id = tuple.getValue(0);
-        final Object data = tuple.getValue(1);
-        final TOutput output = delegateExecution(data);
-        emitOutput(collector, tuple, id, output);
+        try {
+            final Object id = tuple.getValue(0);
+            final Object data = tuple.getValue(1);
+            final TOutput output = delegateExecution(data);
+            emitOutput(collector, tuple, id, output);
+            collector.ack(tuple);
+        } catch (RuntimeException e) {
+            collector.reportError(e);
+            collector.fail(tuple);
+        }
     }
 
     @Override
