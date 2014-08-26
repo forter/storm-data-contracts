@@ -14,11 +14,9 @@ import java.util.Map;
  */
 public class MockCollectionContractsBolt implements IContractsBolt<MockContractsBoltInput,Collection<MockContractsBoltOutput>> {
 
-    private final boolean emit;
     private final MockContractsBoltOutput output;
 
-    public MockCollectionContractsBolt(boolean emit) {
-        this.emit = emit;
+    public MockCollectionContractsBolt() {
         output = new MockContractsBoltOutput();
         output.output1 =1;
         output.optionalOutput2 = Optional.absent();
@@ -31,10 +29,6 @@ public class MockCollectionContractsBolt implements IContractsBolt<MockContracts
 
     @Override
     public Collection<MockContractsBoltOutput> executeValidInput(MockContractsBoltInput input) {
-        if (!emit) {
-            return Lists.newArrayList();
-        }
-
         return Lists.newArrayList(output,output);
     }
 

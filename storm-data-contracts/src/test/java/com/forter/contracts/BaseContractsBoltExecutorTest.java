@@ -30,7 +30,6 @@ public class BaseContractsBoltExecutorTest {
     ObjectMapper mapper = new ObjectMapper();
     final String id = "1";
 
-
     @Test
     public void testContractsBolt() {
         //mock copies input to output
@@ -38,7 +37,7 @@ public class BaseContractsBoltExecutorTest {
         MockContractsBoltOutput output = new MockContractsBoltOutput();
         output.output1 = -1;
         output.optionalOutput2 = Optional.of(-1);
-        IContractsBolt contractsBolt = new MockContractsBolt(true);
+        IContractsBolt contractsBolt = new MockContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertEmitEquals(collector, output);
     }
@@ -47,7 +46,7 @@ public class BaseContractsBoltExecutorTest {
     public void testCollectionContractBolt() {
         //mock copies input to output twice
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
-        MockCollectionContractsBolt contractsBolt = new MockCollectionContractsBolt(true);
+        MockCollectionContractsBolt contractsBolt = new MockCollectionContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertNumberOfEmits(collector, 2);
     }
@@ -64,9 +63,8 @@ public class BaseContractsBoltExecutorTest {
 
     @Test
     public void testNullOutput() {
-        //passing false to this mock returns null
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
-        IContractsBolt contractsBolt = new MockContractsBolt(false);
+        IContractsBolt contractsBolt = new MockNullContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertEmitException(collector, NullPointerException.class);
 
@@ -74,7 +72,6 @@ public class BaseContractsBoltExecutorTest {
 
     @Test
     public void testNullOptionalOutput() {
-        //passing false to this mock returns null
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         IContractsBolt contractsBolt = new MockNullOptionalContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
@@ -85,7 +82,7 @@ public class BaseContractsBoltExecutorTest {
     public void testInvalidOutput() {
         //optionalInput2 must be at most 10 and mock copies input to output resulting in invalid output
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":100}");
-        IContractsBolt contractsBolt = new MockContractsBolt(true);
+        IContractsBolt contractsBolt = new MockContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertEmitException(collector, IllegalStateException.class);
     }
@@ -122,25 +119,23 @@ public class BaseContractsBoltExecutorTest {
 
     @Test
     public void testAbsentOutput() {
-        //passing false to this mock returns Optional.absent() which means emit nothing
         ObjectNode data = parseJson("{}");
-        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt(false);
+        IContractsBolt contractsBolt = new MockOptionalAbsentBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertNumberOfEmits(collector, 0);
     }
 
     @Test
     public void testEmptyCollectionOutput() {
-        //passing false to this mock returns empty list which means emit nothing
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
-        MockCollectionContractsBolt contractsBolt = new MockCollectionContractsBolt(false);
+        IContractsBolt contractsBolt = new MockEmptyCollectionBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertNumberOfEmits(collector, 0);
     }
 
     private void runMockOptionalContractsBoltTest(String input, MockContractsBoltOutput expectedOutput) {
         ObjectNode data = parseJson(input);
-        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt(true);
+        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
         assertEmitEquals(collector, expectedOutput);
     }

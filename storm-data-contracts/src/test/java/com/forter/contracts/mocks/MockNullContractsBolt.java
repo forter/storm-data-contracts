@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Mocks {@link com.forter.contracts.IContractsBolt}
  */
-public class MockContractsBolt implements IContractsBolt<MockContractsBoltInput,MockContractsBoltOutput> {
+public class MockNullContractsBolt implements IContractsBolt<MockContractsBoltInput,MockContractsBoltOutput> {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
@@ -18,10 +18,7 @@ public class MockContractsBolt implements IContractsBolt<MockContractsBoltInput,
 
     @Override
     public MockContractsBoltOutput executeValidInput(MockContractsBoltInput input) {
-        final MockContractsBoltOutput output = new MockContractsBoltOutput();
-        output.output1 = input.input1;
-        output.optionalOutput2 = input.optionalInput2;
-        return output;
+        return null; //illegal output
     }
 
     @Override
