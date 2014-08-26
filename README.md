@@ -140,7 +140,7 @@ public abstract class ValidContractToMapConverterBolt extends BaseBasicBolt {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         ValidContract<?> validContract = (ValidContract<?>) input.getValue(1);
-        Map map = ContractConverter.instance().convertContractToMap(validContract);
+        Map map = ContractConverter.instance().convertContractToMap(validContract.getContract());
         collector.emit(Lists.newArrayList(input.getValue(0), map));
     }
 ```
