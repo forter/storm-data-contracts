@@ -4,6 +4,7 @@ import com.forter.contracts.IContractsBolt;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.Invokable;
@@ -102,14 +103,18 @@ public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends ICont
     }
 
     public Set<String> getOutputFields() {
-        return Sets.newLinkedHashSet(
-            Iterables.transform(Arrays.asList(outputClass.getFields()),new Function<Field,String>() {
+        return ImmutableSet.copyOf(
+                Iterables.transform(Arrays.asList(outputClass.getFields()), new Function<Field, String>() {
 
-                @Override
-                public String apply(Field input) {
-                    return input.getName();
-                }
-            }));
+                    @Override
+                    public String apply(Field input) {
+                        return input.getName();
+                    }
+                }));
+    }
+
+    public <T extends Annotation> Optional<T> getOutputClassAnnotation(Class<T> annotationClass) {
+        return Optional.fromNullable(outputClass.getAnnotation(annotationClass));
     }
 
 }

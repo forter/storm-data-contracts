@@ -170,7 +170,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         return null;
     }
 
-    public Set<String> getOutputFields() {
-        return reflector.getOutputFields();
+    protected ContractBoltReflector getReflector() {
+        return reflector;
     }
 }

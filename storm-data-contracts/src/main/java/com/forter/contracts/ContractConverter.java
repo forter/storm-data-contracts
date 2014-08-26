@@ -74,4 +74,13 @@ public class ContractConverter {
         }
         return mapper.convertValue(contract, Map.class);
     }
+
+    public String convertContractToJsonString(Object contract) {
+        try {
+            return mapper.writeValueAsString(contract);
+        } catch (JsonProcessingException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
 }
