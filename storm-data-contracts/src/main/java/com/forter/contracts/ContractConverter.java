@@ -61,7 +61,7 @@ public class ContractConverter {
         return updateObjectNodeToContract(node, defaultValues);
     }
 
-    private ObjectNode convertContractToObjectNode(Object contract) {
+    public ObjectNode convertContractToObjectNode(Object contract) {
         if (contract instanceof ValidContract) {
             contract = ((ValidContract) contract).getContract();
         }
