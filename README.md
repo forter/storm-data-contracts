@@ -91,20 +91,60 @@ public class MyBoltTest {
 }
 ```
 
-Bolt Inputs
------------
+Adding Bolt into a Topology
+---------------------------
+```
+// Using Storm's TopologyBuilder
+TopologyBuilder builder = new TopologBuilder();
+builder.setBolt("myContractsBolt",new BaseContractsBoltExecutor(new MyContractsBolt()))
+
+// Using com.forter.monitoring.MonitoredTopologyBuilder
+MonitoredTopologyBuilder builder = new MonitoredTopologBuilder();
+builder.registerRichBolt(IContractsBolt.class, BaseContractsBoltExecutor.class);
+builder.setBolt("myContractsBolt",new MyContractsBolt());
+```
+
+**input**
+
 Bolt expects a pair tuple (such as [id, data]). 
 The second item of the pair is expected to be one of the following:
 * `MyBoltInput` - the expected input type, will be validated by the bolt.
 * `ValidContract<MyBoltInput>` - a wrapper for the expected input type, will not be validated.
-* `ObjectNode` - a weakly typed object (Jackson parsed JSON object similar to Map). Converted to `MyBoltInput` and validated.
-* `SomeOtherBoltInput` - converted into an `ObjectNode` and then converted into `MyBoltInput` and validated.
+* `ObjectNode` - a weakly typed object (Jackson parsed JSON object similar to Map). Converted to MyBoltInput and validated.
+* `Map` or `SomeOtherBoltInput` - converted into an `ObjectNode` and then converted into MyBoltInput and validated.
 
-Bolt Outputs
------------
+**output**
+
 The bolt emits a pair tuple (such as [id, data]).
-The second item of the pair is one of the following:
-* `ValidContract<MyBoltOutput>` which is a wrapper for MyBoltOutput after validation.
+The second item of the pair is of type `ValidContract<MyBoltOutput>`
+
+Transform the output either using the OOP way - deriving from BaseContractsBoltExecutor:
+```
+public class ToMapContractsBoltExecutor<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> extends BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt> {
+
+    public ToMapContractsBoltExecutor(TContractsBolt contractsBolt) {
+        super(contractsBolt);
+    }
+
+    @Override
+    protected Object transformOutput(Object output) {
+        return ContractConverter.instance().convertContractToMap(output);
+    }
+}
+```
+
+Or transform the output the Storm way, with another bolt:
+```
+public abstract class ValidContractToMapConverterBolt extends BaseBasicBolt {
+
+    @Override
+    public void execute(Tuple input, BasicOutputCollector collector) {
+        ValidContract<?> validContract = (ValidContract<?>) input.getValue(1);
+        Map map = ContractConverter.instance().convertContractToMap(validContract);
+        collector.emit(Lists.newArrayList(input.getValue(0), map));
+    }
+```
+
 
 Maven
 -----
