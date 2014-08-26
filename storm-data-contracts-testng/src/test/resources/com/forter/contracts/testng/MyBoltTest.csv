@@ -1,0 +1,3 @@
+input.x,input.y,output.z
+1,prefix,prefix1
+2,__NULL__,default2
