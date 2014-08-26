@@ -113,6 +113,8 @@ The second item of the pair is expected to be one of the following:
 * `ObjectNode` - a weakly typed object (Jackson parsed JSON object similar to Map). Converted to MyBoltInput and validated.
 * `Map` or `SomeOtherBoltInput` - converted into an `ObjectNode` and then converted into MyBoltInput and validated.
 
+This behavior can be modified by overriding the BaseContractsBoltExecutor#transformInput() method.
+
 **output**
 
 The bolt emits a pair tuple (such as [id, data]).
