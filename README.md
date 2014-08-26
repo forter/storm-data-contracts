@@ -104,7 +104,7 @@ builder.registerRichBolt(IContractsBolt.class, BaseContractsBoltExecutor.class);
 builder.setBolt("myContractsBolt",new MyContractsBolt());
 ```
 
-input:
+**input**
 
 Bolt expects a pair tuple (such as [id, data]). 
 The second item of the pair is expected to be one of the following:
@@ -113,7 +113,7 @@ The second item of the pair is expected to be one of the following:
 * `ObjectNode` - a weakly typed object (Jackson parsed JSON object similar to Map). Converted to MyBoltInput and validated.
 * `Map` or `SomeOtherBoltInput` - converted into an `ObjectNode` and then converted into MyBoltInput and validated.
 
-output:
+**output**
 
 The bolt emits a pair tuple (such as [id, data]).
 The second item of the pair is of type `ValidContract<MyBoltOutput>`
@@ -128,7 +128,7 @@ public class ToMapContractsBoltExecutor<TInput, TOutput, TContractsBolt extends 
 
     @Override
     protected Object transformOutput(Object output) {
-        return ObjectNodeConverter.instance().convertContractToMap(output);
+        return ContractConverter.instance().convertContractToMap(output);
     }
 }
 ```
@@ -140,7 +140,7 @@ public abstract class ValidContractToMapConverterBolt extends BaseBasicBolt {
     @Override
     public void execute(Tuple input, BasicOutputCollector collector) {
         ValidContract<?> validContract = (ValidContract<?>) input.getValue(1);
-        Map map = ObjectNodeConverter.instance().convertContractToMap(validContract);
+        Map map = ContractConverter.instance().convertContractToMap(validContract);
         collector.emit(Lists.newArrayList(input.getValue(0), map));
     }
 ```
