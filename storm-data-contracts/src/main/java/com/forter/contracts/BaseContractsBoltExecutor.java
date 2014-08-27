@@ -7,7 +7,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.forter.contracts.reflection.ContractBoltReflector;
+import com.forter.contracts.reflection.ContractsBoltReflector;
 import com.forter.contracts.validation.ContractValidationResult;
 import com.forter.contracts.validation.ContractValidator;
 import com.forter.contracts.validation.ValidContract;
@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Bolt base class that uses Data Objects for input and output.
@@ -28,7 +27,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
     private final TContractsBolt delegate;
     private transient ContractFactory<TInput> inputFactory;
-    private transient ContractBoltReflector reflector;
+    private transient ContractsBoltReflector reflector;
     private transient OutputCollector collector;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
@@ -37,7 +36,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        reflector = new ContractBoltReflector(delegate);
+        reflector = new ContractsBoltReflector(delegate);
         inputFactory = new ContractFactory(reflector.getInputClass());
         this.collector = collector;
         delegate.prepare(stormConf, context);
@@ -170,7 +169,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         return null;
     }
 
-    protected ContractBoltReflector getReflector() {
+    protected ContractsBoltReflector getReflector() {
         return reflector;
     }
 }

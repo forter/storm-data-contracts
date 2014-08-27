@@ -9,8 +9,8 @@ import com.forter.contracts.mocks.*;
 import com.forter.contracts.validation.ValidContract;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 

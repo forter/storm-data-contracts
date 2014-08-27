@@ -4,25 +4,30 @@ import com.forter.contracts.IContractsBolt;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import org.hibernate.validator.valuehandling.UnwrapValidatedValue;
 
 import javax.validation.constraints.NotNull;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Reflects on types and annotations of {@link com.forter.contracts.IContractsBolt} implementations.
  */
-public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> {
+public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> {
 
     private final TContractsBolt bolt;
     public enum EXECUTE_RETURN_TYPE {NOT_NULL_CONTRACT, OPTIONAL_CONTRACT, COLLECTION_CONTRACTS};
@@ -30,7 +35,7 @@ public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends ICont
     private Class<TInput> inputClass;
     private Class<TOutput> outputClass;
 
-    public ContractBoltReflector(TContractsBolt bolt) {
+    public ContractsBoltReflector(TContractsBolt bolt) {
         this.bolt = bolt;
         reflectOnDelegate();
     }
@@ -71,6 +76,7 @@ public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends ICont
             }
         }
         Preconditions.checkState(inputClass != null);
+        Preconditions.checkState(outputClass != null);
     }
 
     private void checkAnnotations(Class<?> contractClass) {
@@ -103,14 +109,16 @@ public class ContractBoltReflector<TInput, TOutput, TContractsBolt extends ICont
     }
 
     public Set<String> getOutputFields() {
-        return ImmutableSet.copyOf(
-                Iterables.transform(Arrays.asList(outputClass.getFields()), new Function<Field, String>() {
 
-                    @Override
-                    public String apply(Field input) {
-                        return input.getName();
-                    }
-                }));
+        final Iterable<Field> fields = Arrays.asList(outputClass.getDeclaredFields());
+        final Function<Field, String> fieldNameFunction = new Function<Field, String>() {
+            @Override
+            public String apply(Field field) {
+                return field.getName();
+            }
+        };
+        return ImmutableSet.copyOf(
+                Iterables.transform(fields,fieldNameFunction));
     }
 
     public <T extends Annotation> Optional<T> getOutputClassAnnotation(Class<T> annotationClass) {
