@@ -2,6 +2,7 @@ package com.forter.contracts;
 import backtype.storm.task.TopologyContext;
 import com.forter.contracts.validation.ContractValidationResult;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
@@ -19,7 +20,7 @@ import java.util.Map;
  *
  * Note: The notation IContactsBolt with an "I" prefix is aligned with the Apache Storm probject
  */
-public interface IContractsBolt<TInput, TOutput> {
+public interface IContractsBolt<TInput, TOutput> extends Serializable {
 
     void prepare(Map stormConf, TopologyContext context);
 
