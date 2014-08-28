@@ -33,4 +33,9 @@ public class MockContractsBolt implements IContractsBolt<MockContractsBoltInput,
     public void cleanup() {
 
     }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return null;
+    }
 }

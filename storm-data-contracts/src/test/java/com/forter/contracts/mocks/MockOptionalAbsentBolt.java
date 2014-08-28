@@ -31,4 +31,9 @@ public class MockOptionalAbsentBolt implements IContractsBolt<MockContractsBoltI
     public void cleanup() {
 
     }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return null;
+    }
 }

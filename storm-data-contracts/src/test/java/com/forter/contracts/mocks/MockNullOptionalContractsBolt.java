@@ -38,4 +38,9 @@ public class MockNullOptionalContractsBolt implements IContractsBolt<MockContrac
     public void cleanup() {
 
     }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return null;
+    }
 }

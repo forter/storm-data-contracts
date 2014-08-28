@@ -39,4 +39,9 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
     public void cleanup() {
 
     }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return null;
+    }
 }

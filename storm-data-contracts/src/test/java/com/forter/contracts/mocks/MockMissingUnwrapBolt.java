@@ -31,4 +31,9 @@ public class MockMissingUnwrapBolt implements IContractsBolt<MockMissingUnwrapIn
     public void cleanup() {
         throw new UnsupportedOperationException("not implemented in mock");
     }
+
+    @Override
+    public Map<String, Object> getComponentConfiguration() {
+        return null;
+    }
 }
