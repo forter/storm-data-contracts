@@ -40,5 +40,13 @@ public interface IContractsBolt<TInput, TOutput> extends Serializable {
     TOutput executeInvalidInput(TInput input, ContractValidationResult violations);
 
     void cleanup();
+
+    /**
+     * Declare configuration specific to this component. Only a subset of the "topology.*" configs can
+     * be overridden. The component configuration can be further overridden when constructing the
+     * topology using {@link backtype.storm.topology.TopologyBuilder}
+     *
+     */
+    Map<String, Object> getComponentConfiguration();
 }
 

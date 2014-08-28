@@ -61,7 +61,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         delegate.cleanup();
     }
 
-    private TOutput delegateExecution(final Object data) {
+    protected TOutput delegateExecution(final Object data) {
         TInput input;
         ContractValidationResult<TInput> inputViolations = null;
         Object contract;
@@ -101,6 +101,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
      */
     protected TInput transformInput(Object contract) {
 
+        if (contract == null) {
+            return null;
+        }
         if (isOfTypeInput(contract)) {
             return (TInput) contract;
         }
@@ -166,7 +169,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
     @Override
     public Map<String, Object> getComponentConfiguration() {
-        return null;
+        return delegate.getComponentConfiguration();
     }
 
     protected ContractsBoltReflector getReflector() {
