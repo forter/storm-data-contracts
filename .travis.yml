@@ -37,5 +37,5 @@ deploy:
     upload-dir: repository/com/forter/storm-data-contracts-testng
     skip_cleanup: true
     on:
-      branch: prod
-
+      all_branches: true
+      tags: true
