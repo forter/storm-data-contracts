@@ -19,7 +19,7 @@ public class OptionalUnwrapper extends ValidatedValueUnwrapper<Object> {
 
     @Override
     public Object handleValidatedValue(Object optional) {
-        Preconditions.checkNotNull(optional, "Optional cannot be null");
+        Preconditions.checkNotNull(optional, "Value cannot be null");
         if (optional instanceof Optional) {
             return ((Optional)optional).orNull();
         }

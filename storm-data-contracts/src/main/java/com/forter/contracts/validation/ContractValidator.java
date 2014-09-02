@@ -1,10 +1,12 @@
 package com.forter.contracts.validation;
 
+import com.google.common.base.Throwables;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.HibernateValidator;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import javax.validation.*;
+import java.util.Set;
 
 /**
  * Validates Plain Old Java Objects using {@link org.hibernate.validator.HibernateValidator}
@@ -21,7 +23,7 @@ public class ContractValidator {
 
     private final Validator validator;
 
-    public ContractValidator() {
+    private ContractValidator() {
         ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class)
                 .configure()
                 .addValidatedValueHandler(new OptionalUnwrapper())
@@ -29,8 +31,15 @@ public class ContractValidator {
         validator = validatorFactory.getValidator();
     }
 
-    public <T> ContractValidationResult<T> validate(T pojo) {
-        return new ContractValidationResult(validator.validate(pojo));
+    public <T> ContractValidationResult<T> validate(T contract) {
+        try {
+            Set<ConstraintViolation<T>> violations = validator.validate(contract);
+            return new ContractValidationResult(contract, violations);
+        }
+        catch (ValidationException e) {
+            return new ContractValidationResult<T>(contract, e);
+        }
+
     }
 
 }

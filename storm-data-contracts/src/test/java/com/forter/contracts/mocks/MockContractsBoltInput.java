@@ -15,6 +15,7 @@ public class MockContractsBoltInput {
     @NotNull
     public Integer input1;
 
+    @Max(10)
     @UnwrapValidatedValue
     public Optional<Integer> optionalInput2;
 }

@@ -14,7 +14,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
-import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
