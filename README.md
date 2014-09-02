@@ -155,7 +155,7 @@ Maven
         <dependency>
             <groupId>com.forter</groupId>
             <artifactId>storm-data-contracts</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.1.1</version>
             <scope>compile</scope>
         </dependency>
         <!-- Annotation dependencies -->
@@ -173,7 +173,7 @@ Maven
         <dependency>
             <groupId>com.forter</groupId>
             <artifactId>storm-data-contracts-testng</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
