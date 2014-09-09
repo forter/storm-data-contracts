@@ -1,8 +1,5 @@
 package com.forter.contracts.validation;
 
-import com.google.common.base.Throwables;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.HibernateValidator;
 
 import javax.validation.*;
@@ -31,15 +28,19 @@ public class ContractValidator {
         validator = validatorFactory.getValidator();
     }
 
-    public <T> ContractValidationResult<T> validate(T contract) {
+    public <T> ValidatedContract<T> validate(T contract) {
         try {
-            Set<ConstraintViolation<T>> violations = validator.validate(contract);
-            return new ContractValidationResult(contract, violations);
+            if (contract != null) {
+                Set<ConstraintViolation<T>> violations = validator.validate(contract);
+                return new ValidatedContract(contract, violations);
+            }
+            else {
+                return new ValidatedContract(contract, new ValidationException("Contract cannot be null"));
+            }
         }
         catch (ValidationException e) {
-            return new ContractValidationResult<T>(contract, e);
+            return new ValidatedContract<T>(contract, e);
         }
-
     }
 
 }

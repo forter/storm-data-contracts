@@ -16,7 +16,7 @@ public class ContractValidatorTest {
         MockContractsBoltInput contract = new MockContractsBoltInput();
         contract.input1 = 1;
         contract.optionalInput2 = Optional.of(1);
-        ContractValidationResult<MockContractsBoltInput> validationResult  =ContractValidator.instance().validate(contract);
+        ValidatedContract<MockContractsBoltInput> validationResult  =ContractValidator.instance().validate(contract);
         assertThat(validationResult.isValid()).isTrue();
     }
 
@@ -25,7 +25,7 @@ public class ContractValidatorTest {
         MockContractsBoltInput contract = new MockContractsBoltInput();
         contract.input1 = null;
         contract.optionalInput2 = Optional.of(1);
-        ContractValidationResult<MockContractsBoltInput> validationResult  =ContractValidator.instance().validate(contract);
+        ValidatedContract<MockContractsBoltInput> validationResult  =ContractValidator.instance().validate(contract);
         validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
     }
@@ -35,7 +35,7 @@ public class ContractValidatorTest {
         MockContractsBoltInput contract = new MockContractsBoltInput();
         contract.input1 = 1;
         contract.optionalInput2 = null;
-        ContractValidationResult<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
+        ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
         validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
     }

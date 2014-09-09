@@ -34,7 +34,7 @@ public class MyBoltTest {
 
     @Test(dataProviderClass=TestDataProvider.class, dataProvider="csv")
     public void test(MyBoltInput input, MyBoltOutput expectedOutput) {
-        Collection<MyBoltOutput> outputs = bolt.executeValidInput(input);
+        Collection<MyBoltOutput> outputs = bolt.execute(input);
         MyBoltOutput output = Iterables.getOnlyElement(outputs);
         assertReflectionEquals(expectedOutput, output);
     }

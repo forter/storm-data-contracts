@@ -1,12 +1,11 @@
 package com.forter.contracts;
 
-import backtype.storm.task.TopologyContext;
 import backtype.storm.task.OutputCollector;
+import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Tuple;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.forter.contracts.mocks.*;
-import com.forter.contracts.validation.ValidContract;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -38,6 +37,7 @@ public class BaseContractsBoltExecutorTest {
         output.optionalOutput2 = Optional.of(-1);
         IContractsBolt contractsBolt = new MockContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
+        verify(collector).ack((Tuple)any());
         assertEmitEquals(collector, output);
     }
 
@@ -47,7 +47,8 @@ public class BaseContractsBoltExecutorTest {
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         MockCollectionContractsBolt contractsBolt = new MockCollectionContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
-        assertNumberOfEmits(collector, 2);
+        verify(collector, times(2)).emit((String)any(), (Tuple)any(), (List<Object>) any());
+        verify(collector).ack((Tuple)any());
     }
 
     @Test
@@ -57,7 +58,9 @@ public class BaseContractsBoltExecutorTest {
         MockContractsBoltOutput output = new MockContractsBoltOutput();
         output.output1 = -1;
         output.optionalOutput2 = Optional.of(-1);
-        runMockOptionalContractsBoltTest(input, output);
+        ObjectNode data = parseJson(input);
+        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
+        execute(data, contractsBolt);
     }
 
     @Test
@@ -65,7 +68,8 @@ public class BaseContractsBoltExecutorTest {
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         IContractsBolt contractsBolt = new MockNullContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
-        assertEmitException(collector, NullPointerException.class);
+        verify(collector).reportError(any(NullPointerException.class));
+        verify(collector).fail((Tuple)any());
 
     }
 
@@ -74,7 +78,8 @@ public class BaseContractsBoltExecutorTest {
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         IContractsBolt contractsBolt = new MockNullOptionalContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
-        assertEmitException(collector, NullPointerException.class);
+        verify(collector).reportError(any(NullPointerException.class));
+        verify(collector).fail((Tuple)any());
     }
     
     @Test
@@ -83,7 +88,8 @@ public class BaseContractsBoltExecutorTest {
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":100}");
         IContractsBolt contractsBolt = new MockContractsBolt();
         OutputCollector collector = execute(data, contractsBolt);
-        assertEmitException(collector, IllegalStateException.class);
+        verify(collector).reportError(any(IllegalStateException.class));
+        verify(collector).fail((Tuple)any());
     }
 
     @Test
@@ -93,7 +99,11 @@ public class BaseContractsBoltExecutorTest {
         MockContractsBoltOutput output = new MockContractsBoltOutput();
         output.output1 = 0;
         output.optionalOutput2 = Optional.absent();
-        runMockOptionalContractsBoltTest(input, output);
+        ObjectNode data = parseJson(input);
+        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
+        OutputCollector collector = execute(data, contractsBolt);
+        assertEmitEquals(collector, output);
+        verify(collector).fail((Tuple)any());
     }
 
     @Test
@@ -103,7 +113,11 @@ public class BaseContractsBoltExecutorTest {
         MockContractsBoltOutput output = new MockContractsBoltOutput();
         output.output1 = -1;
         output.optionalOutput2 = Optional.absent();
-        runMockOptionalContractsBoltTest(input, output);
+        ObjectNode data = parseJson(input);
+        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
+        OutputCollector collector = execute(data, contractsBolt);
+        assertEmitEquals(collector, output);
+        verify(collector).ack((Tuple) any());
     }
 
     @Test
@@ -113,7 +127,11 @@ public class BaseContractsBoltExecutorTest {
         MockContractsBoltOutput output = new MockContractsBoltOutput();
         output.output1 = -1;
         output.optionalOutput2 = Optional.absent();
-        runMockOptionalContractsBoltTest(input, output);
+        ObjectNode data = parseJson(input);
+        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
+        OutputCollector collector = execute(data, contractsBolt);
+        assertEmitEquals(collector, output);
+        verify(collector).ack((Tuple) any());
     }
 
     @Test
@@ -121,7 +139,8 @@ public class BaseContractsBoltExecutorTest {
         ObjectNode data = parseJson("{}");
         IContractsBolt contractsBolt = new MockOptionalAbsentBolt();
         OutputCollector collector = execute(data, contractsBolt);
-        assertNumberOfEmits(collector, 0);
+        verify(collector, times(0)).emit((String)any(), (Tuple)any(), (List<Object>) any()); //no output
+        verify(collector).fail((Tuple) any()); //invalid input
     }
 
     @Test
@@ -129,14 +148,8 @@ public class BaseContractsBoltExecutorTest {
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         IContractsBolt contractsBolt = new MockEmptyCollectionBolt();
         OutputCollector collector = execute(data, contractsBolt);
-        assertNumberOfEmits(collector, 0);
-    }
-
-    private void runMockOptionalContractsBoltTest(String input, MockContractsBoltOutput expectedOutput) {
-        ObjectNode data = parseJson(input);
-        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
-        OutputCollector collector = execute(data, contractsBolt);
-        assertEmitEquals(collector, expectedOutput);
+        verify(collector, times(0)).emit((String)any(), (Tuple)any(), (List<Object>) any());
+        verify(collector).ack((Tuple)any());
     }
 
     private OutputCollector execute(ObjectNode input, IContractsBolt bolt) {
@@ -151,24 +164,11 @@ public class BaseContractsBoltExecutorTest {
         return collector;
     }
 
-
-    private void assertNumberOfEmits(OutputCollector collector, int times) {
-        verify(collector, times(times)).emit((String)any(), (Tuple)any(), (List<Object>) any());
-        verify(collector).ack((Tuple)any());
-    }
-
-    private void assertEmitException(OutputCollector collector, Class<? extends Exception> exceptionClass) {
-        ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
-        verify(collector).reportError(any(exceptionClass));
-        verify(collector).fail((Tuple)any());
-    }
-
     private void assertEmitEquals(OutputCollector collector, Object expectedOutput) {
         ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
         verify(collector).emit((String)any(), (Tuple)any(), actualOutput.capture());
-        verify(collector).ack((Tuple)any());
         List<Object> emittedObjects = (List<Object>) actualOutput.getValue();
-        Object actual = ((ValidContract)emittedObjects.get(1)).getContract();
+        Object actual = emittedObjects.get(1);
         String actualString =  ReflectionToStringBuilder.toString(actual,
                 ToStringStyle.SHORT_PREFIX_STYLE, false, false);
         String expectedString =  ReflectionToStringBuilder.toString(expectedOutput,
