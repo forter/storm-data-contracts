@@ -5,7 +5,9 @@ This project let's you write Storm Bolts in Java with strict data contracts:
 
 Exceptions
 ----------
-All exceptions are reported to storm.
+All input contract violations are reported to storm.
+All #execute() exceptions are reported to storm.
+All output contract violations are reported to storm, and the default output is emitted instead.
 
 Strongly Typed
 --------------
@@ -13,7 +15,7 @@ Bolt input and output are POJOs
 ```
 public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutput>> {
     @Override
-    public Collection<MyBoltOutput> executeValidInput(MyBoltInput input) {
+    public Collection<MyBoltOutput> execute(MyBoltInput input) {
         MyBoltOutput output = new MyBoltOutput();
         if (input.y.isPresent()) {
             output.z = input.y.get() + input.x;
@@ -25,7 +27,7 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
     }
 
     @Override
-    public Collection<MyBoltOutput> executeInvalidInput(MyBoltInput input, ContractValidationResult violations) {
+    public Collection<MyBoltOutput> createDefaultOutput() {
         return Lists.newArrayList();
     }
 }
@@ -94,14 +96,9 @@ public class MyBoltTest {
 Adding Bolt into a Topology
 ---------------------------
 ```
-// Using Storm's TopologyBuilder
 TopologyBuilder builder = new TopologBuilder();
 builder.setBolt("myContractsBolt",new BaseContractsBoltExecutor(new MyContractsBolt()))
 
-// Using com.forter.monitoring.MonitoredTopologyBuilder
-MonitoredTopologyBuilder builder = new MonitoredTopologBuilder();
-builder.registerRichBolt(IContractsBolt.class, BaseContractsBoltExecutor.class);
-builder.setBolt("myContractsBolt",new MyContractsBolt());
 ```
 
 **input**
@@ -109,7 +106,6 @@ builder.setBolt("myContractsBolt",new MyContractsBolt());
 Bolt expects a pair tuple (such as [id, data]). 
 The second item of the pair is expected to be one of the following:
 * `MyBoltInput` - the expected input type, will be validated by the bolt.
-* `ValidContract<MyBoltInput>` - a wrapper for the expected input type, will not be validated.
 * `ObjectNode` - a weakly typed object (Jackson parsed JSON object similar to Map). Converted to MyBoltInput and validated.
 * `Map` or `SomeOtherBoltInput` - converted into an `ObjectNode` and then converted into MyBoltInput and validated.
 
@@ -118,7 +114,9 @@ This behavior can be modified by overriding the BaseContractsBoltExecutor#transf
 **output**
 
 The bolt emits a pair tuple (such as [id, data]).
-The second item of the pair is of type `ValidContract<MyBoltOutput>`
+The second item of the pair is a MyBoltOutput`
+
+This behavior can be modified by overriding the BaseContractsBoltExecutor#transformInput() method.
 
 Transform the output either using the OOP way - deriving from BaseContractsBoltExecutor:
 ```
@@ -135,19 +133,6 @@ public class ToMapContractsBoltExecutor<TInput, TOutput, TContractsBolt extends 
 }
 ```
 
-Or transform the output the Storm way, with another bolt:
-```
-public abstract class ValidContractToMapConverterBolt extends BaseBasicBolt {
-
-    @Override
-    public void execute(Tuple input, BasicOutputCollector collector) {
-        ValidContract<?> validContract = (ValidContract<?>) input.getValue(1);
-        Map map = ContractConverter.instance().convertContractToMap(validContract.getContract());
-        collector.emit(Lists.newArrayList(input.getValue(0), map));
-    }
-```
-
-
 Maven
 -----
 ```
@@ -155,7 +140,7 @@ Maven
         <dependency>
             <groupId>com.forter</groupId>
             <artifactId>storm-data-contracts</artifactId>
-            <version>0.1.1</version>
+            <version>0.2</version>
             <scope>compile</scope>
         </dependency>
         <!-- Annotation dependencies -->
@@ -173,7 +158,7 @@ Maven
         <dependency>
             <groupId>com.forter</groupId>
             <artifactId>storm-data-contracts-testng</artifactId>
-            <version>0.1.1</version>
+            <version>0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
