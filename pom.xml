@@ -6,7 +6,7 @@
 
     <groupId>com.forter</groupId>
     <artifactId>storm-data-contracts-parent</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
