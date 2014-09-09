@@ -147,11 +147,15 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         if (isOfTypeInput(contract)) {
             return (TInput) contract;
         }
-        else if (contract instanceof ObjectNode) {
-            return ContractConverter.instance().convertObjectNodeToContract((ObjectNode) contract, inputFactory);
-        }
         else {
-            return ContractConverter.instance().convertContractToContract(contract, inputFactory);
+            //lock is needed to ensure no threads are iterating over the contract in parallel
+            synchronized (contract) {
+                if (contract instanceof ObjectNode) {
+                    return ContractConverter.instance().convertObjectNodeToContract((ObjectNode) contract, inputFactory);
+                } else {
+                    return ContractConverter.instance().convertContractToContract(contract, inputFactory);
+                }
+            }
         }
     }
 

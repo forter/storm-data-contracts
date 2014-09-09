@@ -12,6 +12,7 @@ import java.util.Map;
 
 /**
  * Converts {@link com.fasterxml.jackson.databind.node.ObjectNode} to a Contract
+ * The methods are not thread safe. Lock on the converted object in case two threads are converting the same one.
  */
 public class ContractConverter {
 
