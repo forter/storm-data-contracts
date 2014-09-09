@@ -86,10 +86,15 @@ public class MyBoltTest {
 
     //reads from src/main/resources/MyBoltTest.csv
     @Test(dataProviderClass=TestDataProvider.class, dataProvider="csv")
-    public void test(MyBoltInput input, MyBoltOutput expectedOutput) {
+    public void testExecute(MyBoltInput input, MyBoltOutput expectedOutput) {
         Collection<MyBoltOutput> outputs = bolt.execute(input);
         MyBoltOutput output = Iterables.getOnlyElement(outputs);
         assertReflectionEquals(expectedOutput, output);
+    }
+    
+    @Test
+    public void testDefaultOutput() {
+        assertThat(ContractValidator.instance().validate(bolt.createDefaultOutput()).isValid());
     }
 }
 ```
