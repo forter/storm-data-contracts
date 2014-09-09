@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -37,6 +38,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient ContractsBoltReflector reflector;
     private transient OutputCollector collector;
     private transient TOutput defaultOutput;
+    private BaseContractsBoltExecutor.IsInvalidPredicate isInvalidPredicate = new IsInvalidPredicate();
+    private BaseContractsBoltExecutor.ValidateContractTransformation validationTransformation = new ValidateContractTransformation();
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -49,7 +52,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         this.collector = collector;
         delegate.prepare(stormConf, context);
         defaultOutput = delegate.createDefaultOutput();
-        Preconditions.checkNotNull(defaultOutput, "Use Optional.absent() instead of null.");
+        Preconditions.checkNotNull(defaultOutput, "getDefaultOutput cannot return null. Use Optional.absent() instead of null.");
         final ValidatedContract<TOutput> validationResult = ContractValidator.instance().validate(defaultOutput);
         Preconditions.checkState(
                 validationResult.isValid(),
@@ -123,13 +126,6 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         delegate.cleanup();
     }
 
-    private Predicate<ValidatedContract> isInvalidPredicate = new Predicate<ValidatedContract>() {
-        @Override
-        public boolean apply(ValidatedContract validatedContract) {
-            return !validatedContract.isValid();
-        }
-    };
-
     private ValidatedContract transformAndValidateInput(final Object contract) {
 
         TInput input = transformInput(contract);
@@ -158,13 +154,6 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             return ContractConverter.instance().convertContractToContract(contract, inputFactory);
         }
     }
-
-    private final Function<Object, ValidatedContract> validationTransformation = new Function<Object, ValidatedContract>() {
-        @Override
-        public ValidatedContract apply(Object input) {
-            return ContractValidator.instance().validate(input);
-        }
-    };
 
     private void emit(Tuple inputTuple, Object id, Object contract) {
         ArrayList<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
@@ -215,4 +204,18 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         return reflector;
     }
 
+    static class IsInvalidPredicate implements Predicate<ValidatedContract>, Serializable {
+
+        @Override
+        public boolean apply(ValidatedContract input) {
+            return !input.isValid();
+        }
+    }
+
+    static class ValidateContractTransformation implements Function<Object, ValidatedContract>, Serializable {
+        @Override
+        public ValidatedContract apply(Object input) {
+            return ContractValidator.instance().validate(input);
+        }
+    }
 }

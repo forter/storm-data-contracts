@@ -1,6 +1,7 @@
 package com.forter.contracts.testng;
 
 import backtype.storm.task.TopologyContext;
+import com.forter.contracts.validation.ContractValidator;
 import com.google.common.collect.Iterables;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -9,6 +10,7 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 import java.util.Map;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
@@ -37,5 +39,10 @@ public class MyBoltTest {
         Collection<MyBoltOutput> outputs = bolt.execute(input);
         MyBoltOutput output = Iterables.getOnlyElement(outputs);
         assertReflectionEquals(expectedOutput, output);
+    }
+
+    @Test
+    public void testDefaultOutput() {
+        assertThat(ContractValidator.instance().validate(bolt.createDefaultOutput()).isValid());
     }
 }

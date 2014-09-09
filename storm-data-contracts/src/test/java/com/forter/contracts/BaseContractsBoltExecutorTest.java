@@ -13,7 +13,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -150,6 +152,19 @@ public class BaseContractsBoltExecutorTest {
         OutputCollector collector = execute(data, contractsBolt);
         verify(collector, times(0)).emit((String)any(), (Tuple)any(), (List<Object>) any());
         verify(collector).ack((Tuple)any());
+    }
+
+    @Test
+    public void testSerializable() {
+        IContractsBolt contractsBolt = new MockEmptyCollectionBolt();
+        BaseContractsBoltExecutor bolt = new BaseContractsBoltExecutor(contractsBolt);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream( baos )) {
+            oos.writeObject(bolt);
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
+
     }
 
     private OutputCollector execute(ObjectNode input, IContractsBolt bolt) {
