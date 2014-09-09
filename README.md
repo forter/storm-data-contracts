@@ -3,12 +3,6 @@ storm-data-contracts
 
 This project let's you write Storm Bolts in Java with strict data contracts:
 
-Exceptions
-----------
-All input contract violations are reported to storm.
-All #execute() exceptions are reported to storm.
-All output contract violations are reported to storm, and the default output is emitted instead.
-
 Strongly Typed
 --------------
 Bolt input and output are POJOs
@@ -52,6 +46,13 @@ public class MyBoltOutput {
     public String z;
 }
 ```
+
+
+Exceptions
+----------
+* All input contract violations are reported to storm.
+* All #execute() exceptions are reported to storm.
+* All output contract violations are reported to storm, and the default output is emitted instead.
 
 CSV driven unit tests 
 ---------------------
@@ -116,9 +117,7 @@ This behavior can be modified by overriding the BaseContractsBoltExecutor#transf
 The bolt emits a pair tuple (such as [id, data]).
 The second item of the pair is a MyBoltOutput`
 
-This behavior can be modified by overriding the BaseContractsBoltExecutor#transformInput() method.
-
-Transform the output either using the OOP way - deriving from BaseContractsBoltExecutor:
+This behavior can be modified by overriding the BaseContractsBoltExecutor#transformOutput() method:
 ```
 public class ToMapContractsBoltExecutor<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> extends BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt> {
 
