@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.forter.contracts.validation.ValidContract;
 import com.google.common.base.Throwables;
 
 import java.util.Map;
@@ -62,16 +61,10 @@ public class ContractConverter {
     }
 
     public ObjectNode convertContractToObjectNode(Object contract) {
-        if (contract instanceof ValidContract) {
-            contract = ((ValidContract) contract).getContract();
-        }
         return mapper.valueToTree(contract);
     }
 
     public Map convertContractToMap(Object contract) {
-        if (contract instanceof ValidContract) {
-            contract = ((ValidContract) contract).getContract();
-        }
         return mapper.convertValue(contract, Map.class);
     }
 

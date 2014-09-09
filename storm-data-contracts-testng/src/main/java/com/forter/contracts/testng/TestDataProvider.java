@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.forter.contracts.ContractConverter;
 import com.forter.contracts.ContractFactory;
-import com.forter.contracts.validation.ContractValidationResult;
+import com.forter.contracts.validation.ValidatedContract;
 import com.forter.contracts.validation.ContractValidator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -99,7 +99,7 @@ public class TestDataProvider {
     }
 
     private static void validate(Object contract) {
-        ContractValidationResult<Object> inputValidationResult = ContractValidator.instance().validate(contract);
+        ValidatedContract<Object> inputValidationResult = ContractValidator.instance().validate(contract);
         if (!inputValidationResult.isValid()) {
             throw new AssertionError("Input validation assertion error: " + inputValidationResult.toString());
         }

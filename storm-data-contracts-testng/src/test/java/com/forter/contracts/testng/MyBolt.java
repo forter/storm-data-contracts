@@ -2,7 +2,6 @@ package com.forter.contracts.testng;
 
 import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
-import com.forter.contracts.validation.ContractValidationResult;
 import com.google.common.collect.Lists;
 
 import java.util.Collection;
@@ -19,7 +18,7 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
     }
 
     @Override
-    public Collection<MyBoltOutput> executeValidInput(MyBoltInput input) {
+    public Collection<MyBoltOutput> execute(MyBoltInput input) {
         MyBoltOutput output = new MyBoltOutput();
         if (input.y.isPresent()) {
             output.z = input.y.get() + input.x;
@@ -31,7 +30,7 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
     }
 
     @Override
-    public Collection<MyBoltOutput> executeInvalidInput(MyBoltInput input, ContractValidationResult violations) {
+    public Collection<MyBoltOutput> createDefaultOutput() {
         return Lists.newArrayList();
     }
 

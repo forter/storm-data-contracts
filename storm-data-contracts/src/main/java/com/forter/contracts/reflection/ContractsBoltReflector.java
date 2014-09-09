@@ -50,7 +50,7 @@ public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends ICon
 
     private void reflectOnDelegate() {
         for (Method method : bolt.getClass().getDeclaredMethods()) {
-            if (method.getName().equals("executeValidInput") && !method.isBridge()) {
+            if (method.getName().equals("execute") && !method.isBridge()) {
                 Invokable<?, Object> invokable = Invokable.from(method);
                 if (invokable.isPublic() && !invokable.isStatic()) {
                     TypeToken<?> parameterType = invokable.getParameters().get(0).getType();

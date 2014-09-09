@@ -2,7 +2,6 @@ package com.forter.contracts.mocks;
 
 import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
-import com.forter.contracts.validation.ContractValidationResult;
 import com.google.common.base.Optional;
 
 import java.util.Map;
@@ -18,12 +17,7 @@ public class MockOptionalAbsentBolt implements IContractsBolt<MockContractsBoltI
     }
 
     @Override
-    public Optional<MockContractsBoltOutput> executeValidInput(MockContractsBoltInput input) {
-        return Optional.absent();
-    }
-
-    @Override
-    public Optional<MockContractsBoltOutput> executeInvalidInput(MockContractsBoltInput input, ContractValidationResult violations) {
+    public Optional<MockContractsBoltOutput> execute(MockContractsBoltInput input) {
         return Optional.absent();
     }
 
@@ -35,5 +29,10 @@ public class MockOptionalAbsentBolt implements IContractsBolt<MockContractsBoltI
     @Override
     public Map<String, Object> getComponentConfiguration() {
         return null;
+    }
+
+    @Override
+    public Optional<MockContractsBoltOutput> createDefaultOutput() {
+        return Optional.absent();
     }
 }

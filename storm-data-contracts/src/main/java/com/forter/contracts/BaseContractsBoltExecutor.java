@@ -8,16 +8,23 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.forter.contracts.reflection.ContractsBoltReflector;
-import com.forter.contracts.validation.ContractValidationResult;
+import com.forter.contracts.validation.ValidatedContract;
 import com.forter.contracts.validation.ContractValidator;
-import com.forter.contracts.validation.ValidContract;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.isEmpty;
+import static com.google.common.collect.Iterables.transform;
 
 /**
  * Bolt base class that uses Data Objects for input and output.
@@ -29,6 +36,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient ContractFactory<TInput> inputFactory;
     private transient ContractsBoltReflector reflector;
     private transient OutputCollector collector;
+    private transient TOutput defaultOutput;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -40,19 +48,73 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         inputFactory = new ContractFactory(reflector.getInputClass());
         this.collector = collector;
         delegate.prepare(stormConf, context);
+        defaultOutput = delegate.createDefaultOutput();
+        Preconditions.checkNotNull(defaultOutput, "Use Optional.absent() instead of null.");
+        final ValidatedContract<TOutput> validationResult = ContractValidator.instance().validate(defaultOutput);
+        Preconditions.checkState(
+                validationResult.isValid(),
+                "Default output failed contract validation: %s",
+                validationResult.toString());
     }
 
     @Override
-    public void execute(Tuple tuple) {
+    public void execute(Tuple inputTuple) {
+        boolean fail = false;
+        TOutput output = defaultOutput;
+        final Object id = inputTuple.getValue(0);
         try {
-            final Object id = tuple.getValue(0);
-            final Object data = tuple.getValue(1);
-            final TOutput output = delegateExecution(data);
-            emitOutput(collector, tuple, id, output);
-            collector.ack(tuple);
+            final Object data = inputTuple.getValue(1);
+            ValidatedContract validatedInputContract = transformAndValidateInput(data);
+
+            if (!validatedInputContract.isValid()) {
+                collector.reportError(new ContractViolationException(validatedInputContract));
+                fail = true;
+            }
+            else {
+                TInput input = (TInput) validatedInputContract.getContract();
+                output = delegate.execute(input);
+            }
+
         } catch (RuntimeException e) {
             collector.reportError(e);
-            collector.fail(tuple);
+            fail = true;
+        }
+        finally {
+            Iterable<Object> outputContracts;
+            Iterable<ValidatedContract> invalidOutputContracts;
+
+
+            if (output == null) {
+                outputContracts = ImmutableList.of();
+                invalidOutputContracts = ImmutableList.of(validationTransformation.apply(output));
+            }
+            else {
+                outputContracts = iterableContracts(output);
+                invalidOutputContracts =
+                        filter(transform(outputContracts,
+                                        validationTransformation),
+                                isInvalidPredicate);
+            }
+
+            if (isEmpty(invalidOutputContracts)) {
+                for (Object contract : outputContracts) {
+                    emit(inputTuple, id, contract);
+                }
+            }
+            else {
+                emit(inputTuple, id, defaultOutput);
+                for (ValidatedContract invalidContract: invalidOutputContracts) {
+                    collector.reportError(new ContractViolationException(invalidContract));
+                }
+                fail = true;
+            }
+
+            if (fail) {
+                collector.fail(inputTuple);
+            }
+            else {
+                collector.ack(inputTuple);
+            }
         }
     }
 
@@ -61,35 +123,17 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         delegate.cleanup();
     }
 
-    protected TOutput delegateExecution(final Object data) {
-        TInput input;
-        ContractValidationResult<TInput> inputViolations = null;
-        Object contract;
-        if (data instanceof ValidContract) {
-            contract = ((ValidContract) data).getContract();
-            if (isOfTypeInput(contract)) {
-                //optimization, skip validation if already validated for the same type
-                inputViolations = new ContractValidationResult();
-            }
+    private Predicate<ValidatedContract> isInvalidPredicate = new Predicate<ValidatedContract>() {
+        @Override
+        public boolean apply(ValidatedContract validatedContract) {
+            return !validatedContract.isValid();
         }
-        else {
-            contract = data;
-        }
+    };
 
-        input = transformInput(contract);
+    private ValidatedContract transformAndValidateInput(final Object contract) {
 
-        if (inputViolations == null) {
-            inputViolations = validatedInput(input);
-        }
-
-        final TOutput output;
-        if (inputViolations.isValid()) {
-            output = delegate.executeValidInput(input);
-        }
-        else {
-            output = delegate.executeInvalidInput(input, inputViolations);
-        }
-        return output;
+        TInput input = transformInput(contract);
+        return ContractValidator.instance().validate(input);
     }
 
     private boolean isOfTypeInput(Object contract) {
@@ -115,56 +159,51 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         }
     }
 
-    private ContractValidationResult<TInput> validatedInput(TInput input) {
-        return ContractValidator.instance().validate(input);
+    private final Function<Object, ValidatedContract> validationTransformation = new Function<Object, ValidatedContract>() {
+        @Override
+        public ValidatedContract apply(Object input) {
+            return ContractValidator.instance().validate(input);
+        }
+    };
+
+    private void emit(Tuple inputTuple, Object id, Object contract) {
+        ArrayList<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
+        collector.emit(Utils.DEFAULT_STREAM_ID, inputTuple, tuple);
     }
 
-    private void emitOutput(OutputCollector collector, Tuple inputTuple, Object id, TOutput output) {
-        Preconditions.checkNotNull(output, "Bolt output cannot be null");
+    private Iterable<Object> iterableContracts(TOutput output) {
+
         switch (reflector.getExecuteReturnType()) {
             case NOT_NULL_CONTRACT:
-                emitContract(collector, inputTuple, id, output);
-                break;
+                return ImmutableList.of((Object)output);
 
             case OPTIONAL_CONTRACT:
                 Optional optional = (Optional) output;
                 if (optional.isPresent()) {
-                    emitContract(collector, inputTuple, id, optional.get());
+                    return ImmutableList.of((Object)optional.get());
                 }
-                break;
+                return ImmutableList.of();
 
             case COLLECTION_CONTRACTS:
-                for(Object contract : (Collection) output) {
-                    emitContract(collector, inputTuple, id, contract);
-                }
-                break;
+                return (Collection) output;
 
             default:
                 Preconditions.checkState(false, "Unsupported executionReturnType " + reflector.getExecuteReturnType());
+                //suppress compiler warning
+                return null;
         }
-    }
-
-    private void emitContract(OutputCollector collector, Tuple inputTuple, Object id, Object output) {
-        validateOutput(output);
-        ArrayList<Object> tuple = Lists.newArrayList(id, transformOutput(output));
-        collector.emit(Utils.DEFAULT_STREAM_ID, inputTuple, tuple);
     }
 
     /**
      * Override this method to provide different output formats.
      */
     protected Object transformOutput(Object output) {
-        return new ValidContract(output);
-    }
-
-    private void validateOutput(Object output) {
-        final ContractValidationResult<Object> outputViolations = ContractValidator.instance().validate(output);
-        Preconditions.checkState(outputViolations.isValid(), outputViolations.toString());
+        return output;
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("id","validatedContract"));
+        declarer.declare(new Fields("id", "validatedContract"));
     }
 
     @Override
@@ -175,4 +214,5 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     protected ContractsBoltReflector getReflector() {
         return reflector;
     }
+
 }

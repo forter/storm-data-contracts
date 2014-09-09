@@ -1,6 +1,7 @@
 package com.forter.contracts.validation;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -14,29 +15,35 @@ import java.util.Set;
  * A set of {@link ConstraintViolation}s that has a proper {@link #toString} method.
  * Also supports {@link javax.validation.ValidationException}
  */
-public class ContractValidationResult<T> {
+public class ValidatedContract<T> {
 
     private final Set<ConstraintViolation<T>> violations;
     private final Optional<ValidationException> exception;
-    private final Optional<T> contract;
+    private final T contract;
+
     /**
      * creates a valid contract
      */
-    public ContractValidationResult() {
-        this(Optional.<T>absent(), Sets.<ConstraintViolation<T>>newHashSet(), Optional.<ValidationException>absent());
+    public ValidatedContract(T contract) {
+        this(contract, Sets.<ConstraintViolation<T>>newHashSet());
     }
 
-    public ContractValidationResult(T contract, Set<ConstraintViolation<T>> violations) {
-        this(Optional.fromNullable(contract), violations, Optional.<ValidationException>absent());
+
+    public ValidatedContract(T contract, Set<ConstraintViolation<T>> violations) {
+        this(contract, violations, Optional.<ValidationException>absent());
     }
 
-    public ContractValidationResult(T contract, ValidationException e) {
-        this(Optional.fromNullable(contract), Sets.<ConstraintViolation<T>>newHashSet(), Optional.of(e));
+    public ValidatedContract(T contract, ValidationException e) {
+        this(contract, Sets.<ConstraintViolation<T>>newHashSet(), Optional.of(e));
     }
 
-    private ContractValidationResult(Optional<T> contract, Set<ConstraintViolation<T>> violations, Optional<ValidationException> exception) {
+    private ValidatedContract(T contract, Set<ConstraintViolation<T>> violations, Optional<ValidationException> exception) {
         this.contract = contract;
         this.violations = violations;
+
+        /** TODO: Remove when https://github.com/forter/storm-data-contracts/issues/6 is resolved
+         * and the null check is removed from {@link OptionalUnwrapper#handleValidatedValue}
+         */
         this.exception = exception;
     }
 
@@ -57,13 +64,21 @@ public class ContractValidationResult<T> {
             Throwable rootCause = Throwables.getRootCause(exception.get());
             sb.append(rootCause.getMessage());
         }
-
-        sb.append(" Contract:").append(ToStringBuilder.reflectionToString(contract, ToStringStyle.SHORT_PREFIX_STYLE));
+        if (contract == null) {
+            sb.append(" Contract: null");
+        }
+        else {
+            sb.append(" Contract:").append(ToStringBuilder.reflectionToString(contract, ToStringStyle.SHORT_PREFIX_STYLE));
+        }
         final String message = sb.toString();
         return message;
     }
 
     public boolean isValid() {
         return violations.isEmpty() && !exception.isPresent();
+    }
+
+    public T getContract() {
+        return contract;
     }
 }
