@@ -2,7 +2,7 @@ package com.forter.contracts.mocks;
 
 import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
-import com.forter.contracts.validation.ContractValidationResult;
+import com.google.common.base.Optional;
 
 import java.util.Map;
 
@@ -18,15 +18,9 @@ public class MockMissingUnwrapBolt implements IContractsBolt<MockMissingUnwrapIn
     }
 
     @Override
-    public MockContractsBoltOutput executeValidInput(MockMissingUnwrapInput input) {
+    public MockContractsBoltOutput execute(MockMissingUnwrapInput input) {
         throw new UnsupportedOperationException("not implemented in mock");
     }
-
-    @Override
-    public MockContractsBoltOutput executeInvalidInput(MockMissingUnwrapInput input, ContractValidationResult violations) {
-        throw new UnsupportedOperationException("not implemented in mock");
-    }
-
     @Override
     public void cleanup() {
         throw new UnsupportedOperationException("not implemented in mock");
@@ -35,5 +29,13 @@ public class MockMissingUnwrapBolt implements IContractsBolt<MockMissingUnwrapIn
     @Override
     public Map<String, Object> getComponentConfiguration() {
         return null;
+    }
+
+    @Override
+    public MockContractsBoltOutput createDefaultOutput() {
+        MockContractsBoltOutput output = new MockContractsBoltOutput();
+        output.output1= 0;
+        output.optionalOutput2 = Optional.absent();
+        return output;
     }
 }

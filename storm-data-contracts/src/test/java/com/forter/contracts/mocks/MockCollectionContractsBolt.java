@@ -2,7 +2,6 @@ package com.forter.contracts.mocks;
 
 import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
-import com.forter.contracts.validation.ContractValidationResult;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
@@ -28,13 +27,8 @@ public class MockCollectionContractsBolt implements IContractsBolt<MockContracts
     }
 
     @Override
-    public Collection<MockContractsBoltOutput> executeValidInput(MockContractsBoltInput input) {
+    public Collection<MockContractsBoltOutput> execute(MockContractsBoltInput input) {
         return Lists.newArrayList(output,output);
-    }
-
-    @Override
-    public Collection<MockContractsBoltOutput> executeInvalidInput(MockContractsBoltInput input, ContractValidationResult violations) {
-        throw new UnsupportedOperationException("not implemented in mock");
     }
 
     @Override
@@ -45,5 +39,10 @@ public class MockCollectionContractsBolt implements IContractsBolt<MockContracts
     @Override
     public Map<String, Object> getComponentConfiguration() {
         return null;
+    }
+
+    @Override
+    public Collection<MockContractsBoltOutput> createDefaultOutput() {
+        return Lists.newArrayList();
     }
 }

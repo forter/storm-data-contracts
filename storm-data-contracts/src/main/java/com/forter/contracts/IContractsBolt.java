@@ -1,6 +1,5 @@
 package com.forter.contracts;
 import backtype.storm.task.TopologyContext;
-import com.forter.contracts.validation.ContractValidationResult;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,14 +29,8 @@ public interface IContractsBolt<TInput, TOutput> extends Serializable {
      * @param input the input that requires processing
      * @return the output object to emit or Optional.absent() if no emit is necessary.
      */
-    TOutput executeValidInput(TInput input);
+    TOutput execute(TInput input);
 
-    /**
-     * Returns the output when the input is illegal
-     * All acking is managed for you. Throw a FailedException if you want to fail the input.
-     * @return the output object to emit.
-     */
-    TOutput executeInvalidInput(TInput input, ContractValidationResult violations);
 
     void cleanup();
 
@@ -48,5 +41,12 @@ public interface IContractsBolt<TInput, TOutput> extends Serializable {
      *
      */
     Map<String, Object> getComponentConfiguration();
+
+    /**
+     * Returns the output when the input is illegal or an exception occured during execution
+     * All acking is managed for you. Throw an exception if you want to fail the input.
+     * @return the output object to emit.
+     */
+    TOutput createDefaultOutput();
 }
 
