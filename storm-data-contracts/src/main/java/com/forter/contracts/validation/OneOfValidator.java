@@ -9,7 +9,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Checks against one of the specified values
+ * Checks against one of the specified values.
+ * Returns isValid true if the value is null. Use @NotNull to explicitly reject null values.
  */
 public class OneOfValidator  implements ConstraintValidator<OneOf, Object>{
 
@@ -23,6 +24,6 @@ public class OneOfValidator  implements ConstraintValidator<OneOf, Object>{
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
-        return value != null && values.contains(String.valueOf(value));
+        return value == null || values.contains(String.valueOf(value));
     }
 }
