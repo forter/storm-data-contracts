@@ -12,6 +12,7 @@ import java.util.Map;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertTrue;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
 /**
@@ -43,6 +44,6 @@ public class MyBoltTest {
 
     @Test
     public void testDefaultOutput() {
-        assertThat(ContractValidator.instance().validate(bolt.createDefaultOutput()).isValid());
+        assertTrue(ContractValidator.instance().validate(bolt.createDefaultOutput()).isValid());
     }
 }
