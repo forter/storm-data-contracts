@@ -94,7 +94,7 @@ public class MyBoltTest {
     
     @Test
     public void testDefaultOutput() {
-        assertThat(ContractValidator.instance().validate(bolt.createDefaultOutput()).isValid());
+        assertTrue(ContractValidator.instance().validate(bolt.createDefaultOutput()).isValid());
     }
 }
 ```

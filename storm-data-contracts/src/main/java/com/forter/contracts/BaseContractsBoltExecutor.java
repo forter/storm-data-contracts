@@ -70,7 +70,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             ValidatedContract validatedInputContract = transformAndValidateInput(data);
 
             if (!validatedInputContract.isValid()) {
-                collector.reportError(new ContractViolationException(validatedInputContract));
+                // collector.reportError(new ContractViolationException(validatedInputContract));
                 fail = true;
             }
             else {
