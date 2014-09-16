@@ -15,7 +15,8 @@ deploy:
     upload-dir: repository/com/forter/storm-data-contracts-parent
     skip_cleanup: true
     on:
-      branch: prod 
+      all_branches: true
+      tags: true
   - provider: s3
     access_key_id:
       secure: "hYgWZsOMIz397lbi5/lwx508hB4EHdn6nauqHYqGJb8WSiM7Gk+d/UkwGR6O4VWBNBjzgYr3wjZj8WG/LpP1SxAOfhefadgLdULGhEPXxzpA4Vmkh84cejB4cVXlocy2j7qih3Yg5DMxvUn2NF9yZMYVKafAkCD9Xc4HUUCXb9A="
@@ -26,7 +27,8 @@ deploy:
     upload-dir: repository/com/forter/storm-data-contracts
     skip_cleanup: true
     on:
-      branch: prod
+      all_branches: true
+      tags: true
   - provider: s3
     access_key_id:
       secure: "hYgWZsOMIz397lbi5/lwx508hB4EHdn6nauqHYqGJb8WSiM7Gk+d/UkwGR6O4VWBNBjzgYr3wjZj8WG/LpP1SxAOfhefadgLdULGhEPXxzpA4Vmkh84cejB4cVXlocy2j7qih3Yg5DMxvUn2NF9yZMYVKafAkCD9Xc4HUUCXb9A="
