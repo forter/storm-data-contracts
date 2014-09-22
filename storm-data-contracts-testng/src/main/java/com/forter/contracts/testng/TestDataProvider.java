@@ -1,6 +1,8 @@
 package com.forter.contracts.testng;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -12,6 +14,7 @@ import com.forter.contracts.validation.ValidatedContract;
 import com.forter.contracts.validation.ContractValidator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.common.io.Resources;
 import com.google.common.reflect.Invokable;
@@ -72,8 +75,8 @@ public class TestDataProvider {
                         Preconditions.checkArgument(false, "CSV header " + entry.getKey() + " must start with " + "input. or output.");
                     }
                 }
-                nullify(inputNode);
-                nullify(outputNode);
+                convertNullsOrJson(inputNode);
+                convertNullsOrJson(outputNode);
                 final Object input = createAndValidateContract(inputNode, inputFactory);
                 final Object output = createAndValidateContract(outputNode, outputFactory);
                 return new Object[]{input, output};
@@ -81,12 +84,24 @@ public class TestDataProvider {
         });
     }
 
-    private static void nullify(ObjectNode node) {
+    private static void convertNullsOrJson(ObjectNode node) {
         Iterator<String> iterator = node.fieldNames();
         while(iterator.hasNext()) {
             String fieldName = iterator.next();
             TextNode textNode = (TextNode) node.get(fieldName);
-            if (textNode.textValue().equals("__NULL__")) {
+            if ((textNode.textValue().startsWith("{") && textNode.textValue().endsWith("}")) ||
+                (textNode.textValue().startsWith("[") && textNode.textValue().endsWith("]")))
+            {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode actualObj = null;
+                try {
+                    actualObj = mapper.readTree(textNode.textValue());
+                } catch (IOException e) {
+                    throw Throwables.propagate(e);
+                }
+                node.set(fieldName, actualObj);
+            }
+            else if (textNode.textValue().equals("__NULL__")) {
                 node.set(fieldName, null);
             }
         }

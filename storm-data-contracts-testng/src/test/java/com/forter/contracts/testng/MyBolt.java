@@ -5,6 +5,7 @@ import com.forter.contracts.IContractsBolt;
 import com.google.common.collect.Lists;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -26,12 +27,24 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
         else {
             output.z = "default" + input.x;
         }
+
+        MyBoltList listItem = new MyBoltList();
+
+        listItem.x = "test";
+        listItem.y = "test";
+
+        output.list = new LinkedList<>();
+
+        output.list.add(listItem);
+
         return Lists.newArrayList(output);
     }
 
     @Override
     public Collection<MyBoltOutput> createDefaultOutput() {
-        return Lists.newArrayList();
+        MyBoltOutput output = new MyBoltOutput();
+
+        return Lists.newArrayList(output);
     }
 
     @Override
