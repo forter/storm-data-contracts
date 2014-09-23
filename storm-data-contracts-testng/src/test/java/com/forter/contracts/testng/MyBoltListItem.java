@@ -3,12 +3,12 @@ package com.forter.contracts.testng;
 import javax.validation.constraints.NotNull;
 
 /**
- * Created by Lirown on 9/18/14.
+ *  List of {@link MyBolt}
  */
-public class MyBoltList {
+public class MyBoltListItem {
 
     @NotNull
-    public String x;
+    public int x;
 
     @NotNull
     public String y;

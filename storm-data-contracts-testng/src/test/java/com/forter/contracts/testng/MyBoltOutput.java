@@ -10,5 +10,5 @@ public class MyBoltOutput {
     @NotNull
     public String z;
 
-    public List<MyBoltList> list;
+    public List<MyBoltListItem> list;
 }

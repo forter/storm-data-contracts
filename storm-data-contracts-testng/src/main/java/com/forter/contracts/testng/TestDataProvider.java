@@ -86,13 +86,13 @@ public class TestDataProvider {
 
     private static void convertNullsOrJson(ObjectNode node) {
         Iterator<String> iterator = node.fieldNames();
+        ObjectMapper mapper = new ObjectMapper();
         while(iterator.hasNext()) {
             String fieldName = iterator.next();
             TextNode textNode = (TextNode) node.get(fieldName);
             if ((textNode.textValue().startsWith("{") && textNode.textValue().endsWith("}")) ||
                 (textNode.textValue().startsWith("[") && textNode.textValue().endsWith("]")))
             {
-                ObjectMapper mapper = new ObjectMapper();
                 JsonNode actualObj = null;
                 try {
                     actualObj = mapper.readTree(textNode.textValue());

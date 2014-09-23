@@ -28,9 +28,9 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
             output.z = "default" + input.x;
         }
 
-        MyBoltList listItem = new MyBoltList();
+        MyBoltListItem listItem = new MyBoltListItem();
 
-        listItem.x = "test";
+        listItem.x = 1;
         listItem.y = "test";
 
         output.list = new LinkedList<>();
