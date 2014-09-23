@@ -56,7 +56,7 @@ public class ContractValidatorTest {
     }
 
     @Test
-    public void testWithListNotValid() {
+    public void testWithListNullViolation() {
         MockContractsWithListOutput contract = new MockContractsWithListOutput();
         contract.output1 = 1;
         contract.optionalOutput2 = Optional.absent();
