@@ -70,7 +70,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             ValidatedContract validatedInputContract = transformAndValidateInput(data);
 
             if (!validatedInputContract.isValid()) {
-                // collector.reportError(new ContractViolationException(validatedInputContract));
+                reportInputContractValidationFailed(validatedInputContract);
                 fail = true;
             }
             else {
@@ -119,6 +119,10 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 collector.ack(inputTuple);
             }
         }
+    }
+
+    protected void reportInputContractValidationFailed(ValidatedContract validatedInputContract) {
+        // collector.reportError(new ContractViolationException(validatedInputContract));
     }
 
     @Override
