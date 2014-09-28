@@ -23,7 +23,7 @@ public class ContractValidator {
     private ContractValidator() {
         ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class)
                 .configure()
-                .addValidatedValueHandler(new OptionalUnwrapper())
+                .addValidatedValueHandler(new OptionalStringUnwrapper())
                 .buildValidatorFactory();
         validator = validatorFactory.getValidator();
     }
