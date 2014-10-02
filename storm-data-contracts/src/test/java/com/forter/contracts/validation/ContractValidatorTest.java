@@ -2,6 +2,7 @@ package com.forter.contracts.validation;
 
 import com.forter.contracts.mocks.MockContractsBoltInput;
 import com.forter.contracts.mocks.MockContractsWithListOutput;
+import com.forter.contracts.mocks.MockContractsWithOneOf;
 import com.google.common.base.Optional;
 import org.testng.annotations.Test;
 
@@ -65,5 +66,21 @@ public class ContractValidatorTest {
         ValidatedContract<MockContractsWithListOutput> validationResult = ContractValidator.instance().validate(contract);
         validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
+    }
+
+    @Test
+    void testOneOfViolation() {
+        MockContractsWithOneOf contract = new MockContractsWithOneOf();
+        contract.value = "not_in_the_list";
+        ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isFalse();
+    }
+
+    @Test
+    void testOneOfValid() {
+        MockContractsWithOneOf contract = new MockContractsWithOneOf();
+        contract.value = "in_the_list";
+        ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isTrue();
     }
 }
