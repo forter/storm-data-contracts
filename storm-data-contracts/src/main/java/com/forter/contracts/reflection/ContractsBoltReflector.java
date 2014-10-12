@@ -4,7 +4,6 @@ import com.forter.contracts.IContractsBolt;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.Invokable;
@@ -12,16 +11,11 @@ import com.google.common.reflect.TypeToken;
 import org.hibernate.validator.valuehandling.UnwrapValidatedValue;
 
 import javax.validation.constraints.NotNull;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,7 +24,7 @@ import java.util.Set;
 public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> {
 
     private final TContractsBolt bolt;
-    public enum EXECUTE_RETURN_TYPE {NOT_NULL_CONTRACT, OPTIONAL_CONTRACT, COLLECTION_CONTRACTS};
+    public enum EXECUTE_RETURN_TYPE {NOT_NULL_CONTRACT, OPTIONAL_CONTRACT, COLLECTION_CONTRACTS}
     private EXECUTE_RETURN_TYPE executeReturnType;
     private Class<TInput> inputClass;
     private Class<TOutput> outputClass;
@@ -49,7 +43,7 @@ public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends ICon
     }
 
     private void reflectOnDelegate() {
-        for (Method method : bolt.getClass().getDeclaredMethods()) {
+        for (Method method : bolt.getClass().getMethods()) {
             if (method.getName().equals("execute") && !method.isBridge()) {
                 Invokable<?, Object> invokable = Invokable.from(method);
                 if (invokable.isPublic() && !invokable.isStatic()) {
