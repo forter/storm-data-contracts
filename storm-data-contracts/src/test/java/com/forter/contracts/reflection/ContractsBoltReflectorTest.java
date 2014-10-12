@@ -13,8 +13,13 @@ public class ContractsBoltReflectorTest {
     @Test
     public void testNotNullContract() {
         ContractsBoltReflector reflector = new ContractsBoltReflector(new MockContractsBolt());
-        assertThat(reflector.getExecuteReturnType()).isEqualTo(ContractsBoltReflector.EXECUTE_RETURN_TYPE.NOT_NULL_CONTRACT);
-        assertThat(reflector.getInputClass()).isEqualTo(MockContractsBoltInput.class);
+        assertNotNullContract(reflector);
+    }
+
+    @Test
+    public void testInheritedMethod() {
+        ContractsBoltReflector reflector = new ContractsBoltReflector(new MockContractsBoltSubclass());
+        assertNotNullContract(reflector);
     }
 
     @Test
@@ -45,5 +50,10 @@ public class ContractsBoltReflectorTest {
     public void testOutputFields() {
         ContractsBoltReflector reflector = new ContractsBoltReflector(new MockContractsBolt());
         assertThat(reflector.getOutputFields()).containsExactly("output1","optionalOutput2");
+    }
+
+    private static void assertNotNullContract(ContractsBoltReflector reflector) {
+        assertThat(reflector.getExecuteReturnType()).isEqualTo(ContractsBoltReflector.EXECUTE_RETURN_TYPE.NOT_NULL_CONTRACT);
+        assertThat(reflector.getInputClass()).isEqualTo(MockContractsBoltInput.class);
     }
 }
