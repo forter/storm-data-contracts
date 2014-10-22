@@ -6,14 +6,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.reflect.Invokable;
 import com.google.common.reflect.TypeToken;
 import org.hibernate.validator.valuehandling.UnwrapValidatedValue;
 
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -43,34 +42,28 @@ public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends ICon
     }
 
     private void reflectOnDelegate() {
-        for (Method method : bolt.getClass().getMethods()) {
-            if (method.getName().equals("execute") && !method.isBridge()) {
-                Invokable<?, Object> invokable = Invokable.from(method);
-                if (invokable.isPublic() && !invokable.isStatic()) {
-                    TypeToken<?> parameterType = invokable.getParameters().get(0).getType();
-                    inputClass = (Class<TInput>) parameterType.getRawType();
-                    checkAnnotations(inputClass);
-                    TypeToken<?> returnType = invokable.getReturnType();
-                    Class<?> returnClass = returnType.getRawType();
-                    checkAnnotations(returnClass);
-                    if (Collection.class.isAssignableFrom(returnClass)) {
-                        executeReturnType = EXECUTE_RETURN_TYPE.COLLECTION_CONTRACTS;
-                        outputClass = (Class<TOutput>) (returnType.resolveType(Collection.class.getTypeParameters()[0]).getRawType());
-                    }
-                    else if (Optional.class.isAssignableFrom(returnClass)) {
-                        executeReturnType = EXECUTE_RETURN_TYPE.OPTIONAL_CONTRACT;
-                        outputClass = (Class<TOutput>) (returnType.resolveType(Optional.class.getTypeParameters()[0]).getRawType());
-                    }
-                    else {
-                        executeReturnType = EXECUTE_RETURN_TYPE.NOT_NULL_CONTRACT;
-                        outputClass = (Class<TOutput>) returnClass;
-                    }
-                    break;
-                }
-            }
+        TypeToken<? extends IContractsBolt> boltTypeToken = TypeToken.of(bolt.getClass());
+        TypeVariable<Class<IContractsBolt>>[] typeParameters = IContractsBolt.class.getTypeParameters();
+
+        TypeToken<?> inputTypeToken = boltTypeToken.resolveType(typeParameters[0]);
+        inputClass = (Class<TInput>) inputTypeToken.getRawType();
+        checkAnnotations(inputClass);
+
+        TypeToken<?> outputTypeToken = boltTypeToken.resolveType(typeParameters[1]);
+        Class<?> outputRawType = outputTypeToken.getRawType();
+        checkAnnotations(outputRawType);
+        if (Collection.class.isAssignableFrom(outputRawType)) {
+            executeReturnType = EXECUTE_RETURN_TYPE.COLLECTION_CONTRACTS;
+            outputClass = (Class<TOutput>) (outputTypeToken.resolveType(Collection.class.getTypeParameters()[0]).getRawType());
         }
-        Preconditions.checkState(inputClass != null);
-        Preconditions.checkState(outputClass != null);
+        else if (Optional.class.isAssignableFrom(outputRawType)) {
+            executeReturnType = EXECUTE_RETURN_TYPE.OPTIONAL_CONTRACT;
+            outputClass = (Class<TOutput>) (outputTypeToken.resolveType(Optional.class.getTypeParameters()[0]).getRawType());
+        }
+        else {
+            executeReturnType = EXECUTE_RETURN_TYPE.NOT_NULL_CONTRACT;
+            outputClass = (Class<TOutput>) outputRawType;
+        }
     }
 
     private void checkAnnotations(Class<?> contractClass) {
