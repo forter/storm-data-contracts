@@ -23,6 +23,12 @@ public class ContractsBoltReflectorTest {
     }
 
     @Test
+    public void testGenericInheritedMethod() {
+        ContractsBoltReflector reflector = new ContractsBoltReflector(new MockExtendedGenericContractsBolt());
+        assertNotNullContract(reflector);
+    }
+
+    @Test
     public void testOptionalContract() {
         ContractsBoltReflector reflector = new ContractsBoltReflector(new MockOptionalContractsBolt());
         assertThat(reflector.getExecuteReturnType()).isEqualTo(ContractsBoltReflector.EXECUTE_RETURN_TYPE.OPTIONAL_CONTRACT);
