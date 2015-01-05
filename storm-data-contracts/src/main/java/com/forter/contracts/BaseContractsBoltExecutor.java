@@ -130,6 +130,10 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         delegate.cleanup();
     }
 
+    public TContractsBolt getContractBolt() {
+        return this.delegate;
+    }
+
     private ValidatedContract transformAndValidateInput(final Object contract) {
 
         TInput input = transformInput(contract);
