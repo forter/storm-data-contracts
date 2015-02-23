@@ -2,6 +2,7 @@ package com.forter.contracts;
 
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.tuple.Tuple;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -170,12 +171,12 @@ public class BaseContractsBoltExecutorTest {
     private OutputCollector execute(ObjectNode input, IContractsBolt bolt) {
         BaseContractsBoltExecutor baseContractsBoltExecutor = new BaseContractsBoltExecutor(bolt);
         OutputCollector collector = mock(OutputCollector.class);
-        baseContractsBoltExecutor.prepare(mock(Map.class), mock(TopologyContext.class), collector);
+        baseContractsBoltExecutor.prepare(mock(Map.class), mock(TopologyContext.class));
         Tuple tuple = mock(Tuple.class);
         when(tuple.getValue(0)).thenReturn(id);
         when(tuple.getValue(1)).thenReturn(input);
 
-        baseContractsBoltExecutor.execute(tuple);
+        baseContractsBoltExecutor.execute(tuple, mock(BasicOutputCollector.class));
         return collector;
     }
 
