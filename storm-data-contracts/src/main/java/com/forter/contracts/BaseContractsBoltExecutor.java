@@ -72,15 +72,14 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             ValidatedContract validatedInputContract = transformAndValidateInput(data);
 
             if (!validatedInputContract.isValid()) {
-                throw new ContractViolationException(validatedInputContract);
+                throw new ContractViolationReportedFailedException(validatedInputContract, this.id);
             }
             else {
                 TInput input = (TInput) validatedInputContract.getContract();
                 output = delegate.execute(input);
             }
-        } catch (ContractViolationException cve) {
-            final List<ContractViolationException> violations = Lists.newArrayList(cve);
-            exception = new ContractViolationReportedFailedException(violations, this.id);
+        } catch (ReportedFailedException cve) { // includes ContractViolationReportedFailedException
+            exception = cve;
         } catch (RuntimeException e) {
             exception = new ReportedFailedException(e);
         } finally {
@@ -103,14 +102,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             }
             else {
                 emit(id, defaultOutput, collector);
-
-                final List<ContractViolationException> violations = Lists.newArrayList();
-
-                for (ValidatedContract invalidContract : invalidOutputContracts) {
-                    violations.add(new ContractViolationException(invalidContract));
-                }
-
-                exception = new ContractViolationReportedFailedException(violations, this.id);
+                exception = new ContractViolationReportedFailedException(invalidOutputContracts, this.id);
             }
         }
 
@@ -175,7 +167,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             case OPTIONAL_CONTRACT:
                 Optional optional = (Optional) output;
                 if (optional.isPresent()) {
-                    return ImmutableList.of((Object)optional.get());
+                    return ImmutableList.of(optional.get());
                 }
                 return ImmutableList.of();
 
@@ -222,33 +214,6 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         @Override
         public ValidatedContract apply(Object input) {
             return ContractValidator.instance().validate(input);
-        }
-    }
-
-    public static class ContractViolationReportedFailedException extends ReportedFailedException {
-        private final List<ContractViolationException> violations;
-
-        public ContractViolationReportedFailedException(List<ContractViolationException> violations, String id) {
-            super("There were some contract violations in '" + id + "' bolt." + getViolationsString(violations));
-            this.violations = violations;
-        }
-
-        private static String getViolationsString(List<ContractViolationException> violations) {
-            StringBuilder sb = new StringBuilder();
-
-            if (!violations.isEmpty()) {
-                sb.append(" ");
-                sb.append("Detected violations were:").append("\n");
-                for (ContractViolationException cve : violations) {
-                    sb.append(" - ").append(cve.getMessage()).append("\n");
-                }
-            }
-
-            return sb.toString();
-        }
-
-        public List<ContractViolationException> getContractViolations() {
-            return violations;
         }
     }
 }
