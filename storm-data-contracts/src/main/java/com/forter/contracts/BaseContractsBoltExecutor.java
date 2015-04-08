@@ -22,7 +22,6 @@ import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Iterables.*;
@@ -72,7 +71,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             ValidatedContract validatedInputContract = transformAndValidateInput(data);
 
             if (!validatedInputContract.isValid()) {
-                throw new ContractViolationReportedFailedException(validatedInputContract, this.id);
+                handleInputError(validatedInputContract, this.id, inputTuple);
+                return;
             }
             else {
                 TInput input = (TInput) validatedInputContract.getContract();
@@ -109,6 +109,10 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         if (exception != null) {
             throw exception;
         }
+    }
+
+    protected void handleInputError(ValidatedContract validatedInputContract, String id, Tuple tuple) {
+        // Do nothing
     }
 
     @Override
