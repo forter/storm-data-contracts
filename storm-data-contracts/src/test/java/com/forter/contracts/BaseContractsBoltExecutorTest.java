@@ -86,7 +86,7 @@ public class BaseContractsBoltExecutorTest {
         verify(collector).reportError(any(IllegalStateException.class));
     }
 
-    @Test(expectedExceptions = ContractViolationReportedFailedException.class)
+    @Test
     public void testInvalidInput() {
         //input1 must be at most 10
         String input = "{\"input1\":10000,\"optionalInput2\":-1}";
@@ -129,7 +129,7 @@ public class BaseContractsBoltExecutorTest {
         assertEmitEquals(collector, output);
     }
 
-    @Test(expectedExceptions = ContractViolationReportedFailedException.class)
+    @Test
     public void testAbsentOutput() {
         ObjectNode data = parseJson("{}");
         IContractsBolt contractsBolt = new MockOptionalAbsentBolt();
