@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Throwables;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -66,7 +67,7 @@ public class ContractConverter {
     }
 
     public Map convertContractToMap(Object contract) {
-        return mapper.convertValue(contract, Map.class);
+        return Collections.unmodifiableMap(mapper.convertValue(contract, Map.class));
     }
 
     public String convertContractToJsonString(Object contract) {
