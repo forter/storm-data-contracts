@@ -1,5 +1,11 @@
 package com.forter.contracts.testng;
 
+import com.forter.contracts.ContractConverter;
+import com.forter.contracts.ContractFactory;
+import com.forter.contracts.validation.ContractValidator;
+import com.forter.contracts.validation.ValidatedContract;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,10 +14,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.forter.contracts.ContractConverter;
-import com.forter.contracts.ContractFactory;
-import com.forter.contracts.validation.ValidatedContract;
-import com.forter.contracts.validation.ContractValidator;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -108,7 +110,12 @@ public class TestDataProvider {
     }
 
     private static Object createAndValidateContract(ObjectNode node, ContractFactory<?> factory) {
-        Object contract = ContractConverter.instance().convertObjectNodeToContract(node, factory);
+        Object contract;
+        try {
+            contract = ContractConverter.instance().convertObjectNodeToContract(node, factory);
+        } catch (JsonProcessingException e) {
+            contract = null;
+        }
         validate(contract);
         return contract;
     }
