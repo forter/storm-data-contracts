@@ -39,25 +39,21 @@ public class ContractConverter {
         mapper.registerModule(new GuavaModule());
     }
 
-    public <T> T convertObjectNodeToContract(ObjectNode node, ContractFactory<T> factory) {
+    public <T> T convertObjectNodeToContract(ObjectNode node, ContractFactory<T> factory) throws JsonProcessingException {
         return updateObjectNodeToContract(node,factory.newInstance());
     }
 
-    private <T> T updateObjectNodeToContract(ObjectNode node, T defaultValues) {
-        try {
-            return mapper
-                    .readerForUpdating(defaultValues)
-                    .treeToValue(node, (Class<? extends T>) defaultValues.getClass());
-        } catch (JsonProcessingException e) {
-            throw Throwables.propagate(e);
-        }
+    private <T> T updateObjectNodeToContract(ObjectNode node, T defaultValues) throws JsonProcessingException {
+        return mapper
+                .readerForUpdating(defaultValues)
+                .treeToValue(node, (Class<? extends T>) defaultValues.getClass());
     }
 
-    public <T> T convertContractToContract(Object contract, ContractFactory<T> factory) {
+    public <T> T convertContractToContract(Object contract, ContractFactory<T> factory) throws JsonProcessingException {
         return updateContractToContract(contract, factory.newInstance());
     }
 
-    private <T> T updateContractToContract(Object contract, T defaultValues) {
+    private <T> T updateContractToContract(Object contract, T defaultValues) throws JsonProcessingException {
         ObjectNode node = convertContractToObjectNode(contract);
         return updateObjectNodeToContract(node, defaultValues);
     }

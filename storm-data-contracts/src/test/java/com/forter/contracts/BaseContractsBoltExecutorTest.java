@@ -1,11 +1,15 @@
 package com.forter.contracts;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+import com.forter.contracts.mocks.*;
+
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.tuple.Tuple;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.forter.contracts.mocks.*;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -18,9 +22,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
-
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 /**
  * Unit Tests for {@link BaseContractsBoltExecutor}
@@ -97,7 +98,24 @@ public class BaseContractsBoltExecutorTest {
         MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
         BasicOutputCollector collector = mock(BasicOutputCollector.class);
         try {
-            execute(data, contractsBolt,collector);
+            execute(data, contractsBolt, collector);
+        } finally {
+            assertEmitEquals(collector, output);
+        }
+    }
+
+    @Test
+    public void testInvalidInputTypes() {
+        //input1 must be an integer
+        String input = "{\"input1\":false,\"optionalInput2\":-1}";
+        MockContractsBoltOutput output = new MockContractsBoltOutput();
+        output.output1 = 0;
+        output.optionalOutput2 = Optional.absent();
+        ObjectNode data = parseJson(input);
+        MockOptionalContractsBolt contractsBolt = new MockOptionalContractsBolt();
+        BasicOutputCollector collector = mock(BasicOutputCollector.class);
+        try {
+            execute(data, contractsBolt, collector);
         } finally {
             assertEmitEquals(collector, output);
         }
