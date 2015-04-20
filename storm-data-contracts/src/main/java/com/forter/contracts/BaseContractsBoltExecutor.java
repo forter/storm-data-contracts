@@ -1,5 +1,11 @@
 package com.forter.contracts;
 
+import static com.google.common.collect.Iterables.*;
+
+import com.forter.contracts.reflection.ContractsBoltReflector;
+import com.forter.contracts.validation.ContractValidator;
+import com.forter.contracts.validation.ValidatedContract;
+
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -8,10 +14,8 @@ import backtype.storm.topology.base.BaseBasicBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.forter.contracts.reflection.ContractsBoltReflector;
-import com.forter.contracts.validation.ContractValidator;
-import com.forter.contracts.validation.ValidatedContract;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -24,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import static com.google.common.collect.Iterables.*;
+import javax.validation.ValidationException;
 
 /**
  * Bolt base class that uses Data Objects for input and output.
@@ -125,9 +129,12 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     }
 
     private ValidatedContract transformAndValidateInput(final Object contract) {
-
-        TInput input = transformInput(contract);
-        return ContractValidator.instance().validate(input);
+        try {
+            TInput input = transformInput(contract);
+            return ContractValidator.instance().validate(input);
+        } catch (JsonProcessingException e) {
+            return new ValidatedContract(null, new ValidationException(e));
+        }
     }
 
     private boolean isOfTypeInput(Object contract) {
@@ -136,8 +143,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
     /**
      * Override to support different input formats.
+     * If cannot convert the contract, returns {@code null}.
      */
-    protected TInput transformInput(Object contract) {
+    protected TInput transformInput(Object contract) throws JsonProcessingException {
 
         if (contract == null) {
             return null;

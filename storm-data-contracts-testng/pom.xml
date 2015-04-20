@@ -4,7 +4,7 @@
     <parent>
         <artifactId>storm-data-contracts-parent</artifactId>
         <groupId>com.forter</groupId>
-        <version>0.2.14</version>
+        <version>0.2.15</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -32,6 +32,10 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
