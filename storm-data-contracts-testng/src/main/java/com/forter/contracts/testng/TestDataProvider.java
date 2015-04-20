@@ -110,14 +110,13 @@ public class TestDataProvider {
     }
 
     private static Object createAndValidateContract(ObjectNode node, ContractFactory<?> factory) {
-        Object contract;
         try {
-            contract = ContractConverter.instance().convertObjectNodeToContract(node, factory);
+            Object contract = ContractConverter.instance().convertObjectNodeToContract(node, factory);
+            validate(contract);
+            return contract;
         } catch (JsonProcessingException e) {
-            contract = null;
+            throw Throwables.propagate(e);
         }
-        validate(contract);
-        return contract;
     }
 
     private static void validate(Object contract) {
