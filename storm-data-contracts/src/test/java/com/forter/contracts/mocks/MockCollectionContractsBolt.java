@@ -1,6 +1,7 @@
 package com.forter.contracts.mocks;
 
 import backtype.storm.task.TopologyContext;
+import backtype.storm.tuple.Tuple;
 import com.forter.contracts.IContractsBolt;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -44,5 +45,15 @@ public class MockCollectionContractsBolt implements IContractsBolt<MockContracts
     @Override
     public Collection<MockContractsBoltOutput> createDefaultOutput() {
         return Lists.newArrayList();
+    }
+
+    @Override
+    public Tuple getCurrentTuple() {
+        return null;
+    }
+
+    @Override
+    public void setCurrentTuple(Tuple tuple) {
+
     }
 }

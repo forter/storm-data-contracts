@@ -1,6 +1,7 @@
 package com.forter.contracts.mocks;
 
 import backtype.storm.task.TopologyContext;
+import backtype.storm.tuple.Tuple;
 import com.forter.contracts.IContractsBolt;
 import com.google.common.base.Optional;
 
@@ -46,5 +47,15 @@ public class MockNullOptionalContractsBolt implements IContractsBolt<MockContrac
         defaultOutput.output1 =1;
         defaultOutput.optionalOutput2 = Optional.absent();
         return defaultOutput;
+    }
+
+    @Override
+    public Tuple getCurrentTuple() {
+        return null;
+    }
+
+    @Override
+    public void setCurrentTuple(Tuple tuple) {
+
     }
 }
