@@ -71,6 +71,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
         final Object id = inputTuple.getValue(0);
         try {
+            delegate.setCurrentTuple(inputTuple);
             final Object data = inputTuple.getValue(1);
             ValidatedContract validatedInputContract = transformAndValidateInput(data);
 

@@ -1,5 +1,6 @@
 package com.forter.contracts;
 import backtype.storm.task.TopologyContext;
+import backtype.storm.tuple.Tuple;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -48,5 +49,16 @@ public interface IContractsBolt<TInput, TOutput> extends Serializable {
      * @return the output object to emit.
      */
     TOutput createDefaultOutput();
+
+    /**
+     * @return The current {@link backtype.storm.tuple.Tuple} the bolt is working on.
+     */
+    Tuple getCurrentTuple();
+
+    /**
+     * Saves the current {@link backtype.storm.tuple.Tuple} the bolt is working on.
+     * @param tuple The {@link backtype.storm.tuple.Tuple} to save.
+     */
+    void setCurrentTuple(Tuple tuple);
 }
 
