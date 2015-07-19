@@ -1,31 +1,36 @@
 package com.forter.contracts.mocks;
 
-
 import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Tuple;
 import com.forter.contracts.IContractsBolt;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 
 import java.util.Map;
 
 /**
- * Mocks {@link com.forter.contracts.IContractsBolt}
+ * A mock for testing tuple awareness of {@link com.forter.contracts.IContractsBolt}
  */
-public class MockMissingNotNullBolt implements IContractsBolt<MockMissingNotNullInput,MockContractsBoltOutput> {
+public class MockTupleAwareBolt implements IContractsBolt<MockContractsBoltInput, MockContractsBoltOutput> {
+
+    @VisibleForTesting Tuple currentTuple;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) {
-        throw new UnsupportedOperationException("not implemented in mock");
+
     }
 
     @Override
-    public MockContractsBoltOutput execute(MockMissingNotNullInput input) {
-        throw new UnsupportedOperationException("not implemented in mock");
+    public MockContractsBoltOutput execute(MockContractsBoltInput mockContractsBoltInput) {
+        MockContractsBoltOutput output = new MockContractsBoltOutput();
+        output.output1 = 1;
+        output.optionalOutput2 = Optional.absent();
+        return output;
     }
 
     @Override
     public void cleanup() {
-        throw new UnsupportedOperationException("not implemented in mock");
+
     }
 
     @Override
@@ -36,20 +41,18 @@ public class MockMissingNotNullBolt implements IContractsBolt<MockMissingNotNull
     @Override
     public MockContractsBoltOutput createDefaultOutput() {
         MockContractsBoltOutput output = new MockContractsBoltOutput();
-        output.output1= 0;
+        output.output1 = 1;
         output.optionalOutput2 = Optional.absent();
         return output;
     }
 
     @Override
     public Tuple getCurrentTuple() {
-        return null;
+        return currentTuple;
     }
 
     @Override
     public void setCurrentTuple(Tuple tuple) {
-
+        this.currentTuple = tuple;
     }
-
-
 }

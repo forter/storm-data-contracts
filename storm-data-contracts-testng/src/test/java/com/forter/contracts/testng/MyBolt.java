@@ -1,6 +1,7 @@
 package com.forter.contracts.testng;
 
 import backtype.storm.task.TopologyContext;
+import backtype.storm.tuple.Tuple;
 import com.forter.contracts.IContractsBolt;
 import com.google.common.collect.Lists;
 
@@ -45,6 +46,16 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
         MyBoltOutput output = new MyBoltOutput();
 
         return Lists.newArrayList(output);
+    }
+
+    @Override
+    public Tuple getCurrentTuple() {
+        return null;
+    }
+
+    @Override
+    public void setCurrentTuple(Tuple tuple) {
+
     }
 
     @Override
