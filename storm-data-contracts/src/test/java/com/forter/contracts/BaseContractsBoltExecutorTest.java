@@ -44,6 +44,15 @@ public class BaseContractsBoltExecutorTest {
     }
 
     @Test
+    public void testCurrentTuple() {
+        //mock copies input to output
+        ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
+        IContractsBolt contractsBolt = new MockTupleAwareBolt();
+        execute(data, contractsBolt);
+        assertThat(contractsBolt.getCurrentTuple().getValue(1)).isEqualTo(data);
+    }
+
+    @Test
     public void testCollectionContractBolt() {
         //mock copies input to output twice
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
