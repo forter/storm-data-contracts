@@ -3,10 +3,12 @@ package com.forter.contracts.cache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import com.google.common.hash.Hashing;
-import lombok.SneakyThrows;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -73,10 +75,14 @@ public class BasicCacheDAOTest {
         }
 
         @Override
-        @SneakyThrows
         protected ObjectNode fetch(String key) {
             this.fetchedKey = key;
-            return (ObjectNode) mapper.readTree(SAVED_DATA);
+            try {
+                return (ObjectNode) mapper.readTree(SAVED_DATA);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
+            return null;
         }
 
         @Override
