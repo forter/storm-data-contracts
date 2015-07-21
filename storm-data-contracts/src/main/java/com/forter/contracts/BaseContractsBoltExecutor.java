@@ -2,6 +2,8 @@ package com.forter.contracts;
 
 import static com.google.common.collect.Iterables.*;
 
+import com.forter.contracts.cache.CacheDAO;
+import com.forter.contracts.cache.Cached;
 import com.forter.contracts.reflection.ContractsBoltReflector;
 import com.forter.contracts.validation.ContractValidator;
 import com.forter.contracts.validation.ValidatedContract;
@@ -22,6 +24,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -41,6 +45,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient BaseContractsBoltExecutor.IsInvalidPredicate isInvalidPredicate;
     private transient BaseContractsBoltExecutor.ValidateContractTransformation validationTransformation;
     private transient String id;
+    private transient Optional<CacheDAO<TInput, TOutput>> cache;
+    private boolean isInputCached;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -61,6 +67,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 validationResult.isValid(),
                 "Default output failed contract validation: %s",
                 validationResult.toString());
+        this.isInputCached = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
+        prepareCacheDAO(stormConf, context);
     }
 
     @Override
@@ -80,7 +88,20 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             }
             else {
                 TInput input = (TInput) validatedInputContract.getContract();
-                output = delegate.execute(input);
+                boolean isCachSupported = isInputCached && cache.isPresent();
+                Optional<TOutput> cachedOutput = Optional.absent();
+                if (isCachSupported) {
+                    cachedOutput = cache.get().get(input);
+                }
+                if (cachedOutput.isPresent()) {
+                    output = cachedOutput.get();
+                } else {
+                    long startTime = DateTime.now().withZone(DateTimeZone.UTC).getMillis();
+                    output = delegate.execute(input);
+                    if (isCachSupported) {
+                        cache.get().save(output, input, startTime);
+                    }
+                }
             }
         } catch (ReportedFailedException cve) { // includes ContractViolationReportedFailedException
             exception = cve;
@@ -163,6 +184,10 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 }
             }
         }
+    }
+
+    protected void prepareCacheDAO(Map stormConf, TopologyContext context) {
+        this.cache = Optional.absent();
     }
 
     private void emit(Object id, Object contract, BasicOutputCollector collector) {
