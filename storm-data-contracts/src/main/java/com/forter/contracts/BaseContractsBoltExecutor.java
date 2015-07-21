@@ -45,7 +45,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient BaseContractsBoltExecutor.IsInvalidPredicate isInvalidPredicate;
     private transient BaseContractsBoltExecutor.ValidateContractTransformation validationTransformation;
     private transient String id;
-    private transient Optional<CacheDAO<TInput, TOutput>> cache;
+    private transient Optional<? extends CacheDAO<TInput, TOutput>> cache;
     private boolean isInputCached;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
@@ -68,7 +68,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 "Default output failed contract validation: %s",
                 validationResult.toString());
         this.isInputCached = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
-        prepareCacheDAO(stormConf, context);
+        this.cache = prepareCacheDAO(stormConf, context);
     }
 
     @Override
@@ -186,8 +186,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         }
     }
 
-    protected void prepareCacheDAO(Map stormConf, TopologyContext context) {
-        this.cache = Optional.absent();
+    protected Optional<? extends CacheDAO<TInput, TOutput>> prepareCacheDAO(Map stormConf, TopologyContext context) {
+        return Optional.absent();
     }
 
     private void emit(Object id, Object contract, BasicOutputCollector collector) {

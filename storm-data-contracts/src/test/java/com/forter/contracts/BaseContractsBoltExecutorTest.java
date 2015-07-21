@@ -44,6 +44,30 @@ public class BaseContractsBoltExecutorTest {
     }
 
     @Test
+    public void testCachedExecution() {
+        MockCacheDAO cache = new MockCacheDAO();
+        MockCachedContractBoltExecutor.cache = cache;
+        MockCachedContractBoltExecutor executor = new MockCachedContractBoltExecutor(new MockContractsBolt());
+        executor.prepare(mock(Map.class), mock(TopologyContext.class));
+        assertThat(executor.cache.saved).isFalse();
+        ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
+        //mock copies input to output
+        MockContractsBoltOutput output1 = new MockContractsBoltOutput();
+        output1.output1 = -1;
+        output1.optionalOutput2 = Optional.of(-1);
+        BasicOutputCollector collector = execute(data, executor);
+        assertThat(executor.cache.saved).isTrue();
+        assertThat(executor.cache.fetched).isFalse();
+        assertEmitEquals(collector, output1);
+        MockContractsBoltOutput output2 = new MockContractsBoltOutput();
+        output2.output1 = -1;
+        output2.optionalOutput2 = Optional.absent();
+        collector = execute(data, executor);
+        assertThat(executor.cache.fetched).isTrue();
+        assertEmitEquals(collector, output2);
+    }
+
+    @Test
     public void testCollectionContractBolt() {
         //mock copies input to output twice
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
@@ -186,15 +210,24 @@ public class BaseContractsBoltExecutorTest {
         return collector;
     }
 
+    private BasicOutputCollector execute(ObjectNode input, BaseContractsBoltExecutor executor) {
+        BasicOutputCollector collector = mock(BasicOutputCollector.class);
+        execute(input, executor, collector);
+        return collector;
+    }
+
     private void execute(ObjectNode input, IContractsBolt bolt, BasicOutputCollector collector) {
         BaseContractsBoltExecutor baseContractsBoltExecutor = new BaseContractsBoltExecutor(bolt);
         baseContractsBoltExecutor.prepare(mock(Map.class), mock(TopologyContext.class));
+        execute(input, baseContractsBoltExecutor, collector);
+    }
 
+    private void execute(ObjectNode input, BaseContractsBoltExecutor executor, BasicOutputCollector collector) {
         Tuple tuple = mock(Tuple.class);
         when(tuple.getValue(0)).thenReturn(id);
         when(tuple.getValue(1)).thenReturn(input);
 
-        baseContractsBoltExecutor.execute(tuple, collector);
+        executor.execute(tuple, collector);
     }
 
     private void assertEmitEquals(BasicOutputCollector collector, Object expectedOutput) {
