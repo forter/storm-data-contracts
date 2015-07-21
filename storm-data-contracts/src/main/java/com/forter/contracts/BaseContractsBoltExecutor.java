@@ -24,8 +24,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -96,7 +94,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 if (cachedOutput.isPresent()) {
                     output = cachedOutput.get();
                 } else {
-                    long startTime = DateTime.now().withZone(DateTimeZone.UTC).getMillis();
+                    long startTime = System.currentTimeMillis();
                     output = delegate.execute(input);
                     if (isCachSupported) {
                         cache.get().save(output, input, startTime);

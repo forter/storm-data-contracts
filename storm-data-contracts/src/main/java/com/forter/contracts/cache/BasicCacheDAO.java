@@ -1,5 +1,6 @@
 package com.forter.contracts.cache;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -7,10 +8,8 @@ import com.forter.contracts.ContractConverter;
 import com.forter.contracts.ContractFactory;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.hash.Hashing;
-import lombok.SneakyThrows;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -48,7 +47,6 @@ public abstract class BasicCacheDAO<TInput, TOutput> implements CacheDAO<TInput,
         persist(key, record);
     }
 
-    @SneakyThrows
     public String createKey(Object input) {
         Preconditions.checkState(input.getClass().isAnnotationPresent(Cached.class));
         String type = input.getClass().getAnnotation(Cached.class).value();
@@ -65,7 +63,12 @@ public abstract class BasicCacheDAO<TInput, TOutput> implements CacheDAO<TInput,
                 fieldsIterator.remove();
             }
         }
-        String keyString = mapper.writeValueAsString(key);
+        String keyString = null;
+        try {
+            keyString = mapper.writeValueAsString(key);
+        } catch (JsonProcessingException e) {
+            Throwables.propagate(e);
+        }
         return type + "-" + Hashing.sha256().hashBytes(keyString.getBytes()).toString();
     }
 
@@ -81,15 +84,18 @@ public abstract class BasicCacheDAO<TInput, TOutput> implements CacheDAO<TInput,
     }
 
     private void addRecordMetadata(long startTime, ObjectNode record) {
-        DateTime now = DateTime.now().withZone(DateTimeZone.UTC);
         record.put("startTime", startTime);
-        record.put("duration", now.getMillis() - startTime);
+        record.put("duration", System.currentTimeMillis() - startTime);
         record.put("source", "json");
     }
 
-    @SneakyThrows
     private TOutput createValue(ObjectNode data) {
-        return converter.convertObjectNodeToContract(data, outputFactory);
+        try {
+            return converter.convertObjectNodeToContract(data, outputFactory);
+        } catch (JsonProcessingException e) {
+            Throwables.propagate(e);
+        }
+        return null;
     }
 
 }
