@@ -41,6 +41,10 @@ public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends ICon
         return inputClass;
     }
 
+    public Class<TOutput> getOutputClass() {
+        return outputClass;
+    }
+
     private void reflectOnDelegate() {
         TypeToken<? extends IContractsBolt> boltTypeToken = TypeToken.of(bolt.getClass());
         TypeVariable<Class<IContractsBolt>>[] typeParameters = IContractsBolt.class.getTypeParameters();
