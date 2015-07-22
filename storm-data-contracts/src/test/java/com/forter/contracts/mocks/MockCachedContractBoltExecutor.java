@@ -10,14 +10,15 @@ import java.util.Map;
 
 public class MockCachedContractBoltExecutor extends BaseContractsBoltExecutor {
 
-    public static MockCacheDAO cache;
+    public MockCacheDAO cache;
 
-    public MockCachedContractBoltExecutor(IContractsBolt contractsBolt) {
+    public MockCachedContractBoltExecutor(IContractsBolt contractsBolt, MockCacheDAO cache) {
         super(contractsBolt);
+        this.cache = cache;
     }
 
     @Override
-    protected Optional<? extends CacheDAO> prepareCacheDAO(Map stormConf, TopologyContext context) {
-        return Optional.of(cache);
+    protected CacheDAO createCacheDAO(Map stormConf, TopologyContext context) {
+        return cache;
     }
 }

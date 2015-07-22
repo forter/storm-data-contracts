@@ -3,28 +3,26 @@ package com.forter.contracts.mocks;
 import com.forter.contracts.cache.CacheDAO;
 import com.google.common.base.Optional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Mock {@link com.forter.contracts.cache.CacheDAO}.
  */
 public class MockCacheDAO implements CacheDAO<MockContractsBoltInput, MockContractsBoltOutput> {
 
-    public boolean saved = false;
-    public boolean fetched = false;
+    public Map<MockContractsBoltInput, MockContractsBoltOutput> cache = new HashMap<>();
 
     @Override
-    public Optional<MockContractsBoltOutput> get(MockContractsBoltInput key) {
-        if (saved) {
-            MockContractsBoltOutput output = new MockContractsBoltOutput();
-            output.output1 = -1;
-            output.optionalOutput2 = Optional.absent();
-            fetched = true;
-            return Optional.of(output);
+    public Optional<MockContractsBoltOutput> get(MockContractsBoltInput input) {
+        if (cache.containsKey(input)) {
+            return Optional.of(cache.get(input));
         }
         return Optional.absent();
     }
 
     @Override
-    public void save(MockContractsBoltOutput record, MockContractsBoltInput mockContractsBoltInput, long startTime) {
-        saved = true;
+    public void save(MockContractsBoltOutput output, MockContractsBoltInput input, long startTimeMillis) {
+        cache.put(input, output);
     }
 }

@@ -16,6 +16,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
+import org.unitils.reflectionassert.ReflectionAssert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,26 +46,22 @@ public class BaseContractsBoltExecutorTest {
 
     @Test
     public void testCachedExecution() {
+        MockContractsBolt bolt = new MockContractsBolt();
         MockCacheDAO cache = new MockCacheDAO();
-        MockCachedContractBoltExecutor.cache = cache;
-        MockCachedContractBoltExecutor executor = new MockCachedContractBoltExecutor(new MockContractsBolt());
+        MockCachedContractBoltExecutor executor = new MockCachedContractBoltExecutor(bolt, cache);
         executor.prepare(mock(Map.class), mock(TopologyContext.class));
-        assertThat(executor.cache.saved).isFalse();
+        assertThat(cache.cache.size()).isEqualTo(0);
+
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
-        //mock copies input to output
-        MockContractsBoltOutput output1 = new MockContractsBoltOutput();
-        output1.output1 = -1;
-        output1.optionalOutput2 = Optional.of(-1);
         BasicOutputCollector collector = execute(data, executor);
-        assertThat(executor.cache.saved).isTrue();
-        assertThat(executor.cache.fetched).isFalse();
-        assertEmitEquals(collector, output1);
-        MockContractsBoltOutput output2 = new MockContractsBoltOutput();
-        output2.output1 = -1;
-        output2.optionalOutput2 = Optional.absent();
+        Object output1 = getEmittedContract(collector);
+        assertThat(cache.cache.size()).isEqualTo(1);
+        assertThat(cache.cache.containsValue(output1));
+
         collector = execute(data, executor);
-        assertThat(executor.cache.fetched).isTrue();
-        assertEmitEquals(collector, output2);
+        Object output2 = getEmittedContract(collector);
+        ReflectionAssert.assertReflectionEquals(output2, output1);
+        assertThat(cache.cache.size()).isEqualTo(1);
     }
 
     @Test
@@ -231,15 +228,19 @@ public class BaseContractsBoltExecutorTest {
     }
 
     private void assertEmitEquals(BasicOutputCollector collector, Object expectedOutput) {
-        ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
-        verify(collector).emit((String)any(), actualOutput.capture());
-        List<Object> emittedObjects = (List<Object>) actualOutput.getValue();
-        Object actual = emittedObjects.get(1);
+        Object actual = getEmittedContract(collector);
         String actualString =  ReflectionToStringBuilder.toString(actual,
                 ToStringStyle.SHORT_PREFIX_STYLE, false, false);
         String expectedString =  ReflectionToStringBuilder.toString(expectedOutput,
                 ToStringStyle.SHORT_PREFIX_STYLE, false, false);
         assertThat(actualString).isEqualTo(expectedString);
+    }
+
+    private Object getEmittedContract(BasicOutputCollector collector) {
+        ArgumentCaptor<List> actualOutput = ArgumentCaptor.forClass(List.class);
+        verify(collector).emit((String)any(), actualOutput.capture());
+        List<Object> emittedObjects = (List<Object>) actualOutput.getValue();
+        return emittedObjects.get(1);
     }
 
     private ObjectNode parseJson(String input) {

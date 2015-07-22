@@ -9,6 +9,6 @@ public interface CacheDAO<TInput, TOutput> {
 
     public Optional<TOutput> get(TInput key);
 
-    public void save(TOutput record, TInput input, long startTime);
+    public void save(TOutput record, TInput input, long startTimeMillis);
 
 }
