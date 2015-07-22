@@ -54,6 +54,42 @@ Exceptions
 * All #execute() exceptions are reported to storm.
 * All output contract violations are reported to storm, and the default output is emitted instead.
 
+
+Caching
+-------
+BaseContractsBoltExecutor supports adding a caching mechanism via inheritance and overriding of
+BaseContractsBoltExecutor#createCacheDAO.
+```
+public class MyCacheDAO<TInput, TOutput> implements CacheDAO<TInput, TInput> {
+
+    public Map<TInput, TOutput> cache = new HashMap<>();
+
+    @Override
+    public Optional<TOutput> get(TInput input) {
+        if (cache.containsKey(input)) {
+            return Optional.of(cache.get(input));
+        }
+        return Optional.absent();
+    }
+
+    @Override
+    public void save(TOutput output, TInput input, long startTimeMillis) {
+        cache.put(input, output);
+    }
+}
+
+public class MyCachedContractBoltExecutor<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>>
+        extends BaseContractsBoltExecutor {
+
+    @Override
+    protected CacheDAO<TInput, TOutput> createCacheDAO(Map stormConf, TopologyContext context) {
+        return new MyCacheDAO<TInput, TOutput();
+    }
+
+}
+```
+
+
 CSV driven unit tests 
 ---------------------
 CSV file header is used to inject data into MyBoltInput and expected MyBoltOutput during unit tests
