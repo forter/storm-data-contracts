@@ -59,13 +59,28 @@ Caching
 -------
 BaseContractsBoltExecutor supports adding a caching mechanism via inheritance and overriding of
 BaseContractsBoltExecutor#createCacheDAO.
+Cached input contracts should be annotated with @Cached annotation and fields which are used as cache keys should be
+annotated with @CacheKey
 ```
-public class MyCacheDAO<TInput, TOutput> implements CacheDAO<TInput, TInput> {
+@Cached
+public class Input {
 
-    public Map<TInput, TOutput> cache = new HashMap<>();
+    @Max(10)
+    @NotNull
+    @CacheKey
+    public Integer input1;
+
+    @Max(10)
+    @UnwrapValidatedValue
+    public Optional<Integer> optionalInput2;
+}
+
+public class MyCacheDAO<TOutput> implements CacheDAO<TOutput> {
+
+    public Map<Map<String, Object>, TOutput> cache = new HashMap<>();
 
     @Override
-    public Optional<TOutput> get(TInput input) {
+    public Optional<TOutput> get(Map<String, Object> input) {
         if (cache.containsKey(input)) {
             return Optional.of(cache.get(input));
         }
@@ -73,8 +88,8 @@ public class MyCacheDAO<TInput, TOutput> implements CacheDAO<TInput, TInput> {
     }
 
     @Override
-    public void save(TOutput output, TInput input, long startTimeMillis) {
-        cache.put(input, output);
+    public void save(TOutput output, Map<String, Object> inputKey, long startTimeMillis) {
+        cache.put(inputKey, output);
     }
 }
 
@@ -83,7 +98,7 @@ public class MyCachedContractBoltExecutor<TInput, TOutput, TContractsBolt extend
 
     @Override
     protected CacheDAO<TInput, TOutput> createCacheDAO(Map stormConf, TopologyContext context) {
-        return new MyCacheDAO<TInput, TOutput();
+        return new MyCacheDAO<TOutput>();
     }
 
 }

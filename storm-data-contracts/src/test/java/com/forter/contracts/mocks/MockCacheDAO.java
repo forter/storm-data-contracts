@@ -9,20 +9,20 @@ import java.util.Map;
 /**
  * Mock {@link com.forter.contracts.cache.CacheDAO}.
  */
-public class MockCacheDAO implements CacheDAO<MockContractsBoltInput, MockContractsBoltOutput> {
+public class MockCacheDAO implements CacheDAO<MockContractsBoltOutput> {
 
-    public Map<MockContractsBoltInput, MockContractsBoltOutput> cache = new HashMap<>();
+    public Map<Map<String, Object>, MockContractsBoltOutput> cache = new HashMap<>();
 
     @Override
-    public Optional<MockContractsBoltOutput> get(MockContractsBoltInput input) {
-        if (cache.containsKey(input)) {
-            return Optional.of(cache.get(input));
+    public Optional<MockContractsBoltOutput> get(Map<String, Object> key) {
+        if (cache.containsKey(key)) {
+            return Optional.of(cache.get(key));
         }
         return Optional.absent();
     }
 
     @Override
-    public void save(MockContractsBoltOutput output, MockContractsBoltInput input, long startTimeMillis) {
-        cache.put(input, output);
+    public void save(MockContractsBoltOutput output, Map<String, Object> inputKey, long startTimeMillis) {
+        cache.put(inputKey, output);
     }
 }
