@@ -2,6 +2,10 @@ package com.forter.contracts;
 
 import static com.google.common.collect.Iterables.*;
 
+import com.forter.contracts.cache.CacheDAO;
+import com.forter.contracts.cache.CacheKeyFilter;
+import com.forter.contracts.cache.Cached;
+import com.forter.contracts.cache.DummyCacheDAO;
 import com.forter.contracts.reflection.ContractsBoltReflector;
 import com.forter.contracts.validation.ContractValidator;
 import com.forter.contracts.validation.ValidatedContract;
@@ -41,6 +45,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient BaseContractsBoltExecutor.IsInvalidPredicate isInvalidPredicate;
     private transient BaseContractsBoltExecutor.ValidateContractTransformation validationTransformation;
     private transient String id;
+    private transient CacheDAO<? super TOutput> cache;
+    private transient CacheKeyFilter cacheKeyFilter;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -61,6 +67,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 validationResult.isValid(),
                 "Default output failed contract validation: %s",
                 validationResult.toString());
+        boolean isCacheSupported = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
+        this.cache = isCacheSupported ? createCacheDAO(stormConf, context) : new DummyCacheDAO<TOutput>();
+        this.cacheKeyFilter = new CacheKeyFilter(this.reflector.getInputClass());
     }
 
     @Override
@@ -80,7 +89,15 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             }
             else {
                 TInput input = (TInput) validatedInputContract.getContract();
-                output = delegate.execute(input);
+                Map<String, Object> cacheKey = cacheKeyFilter.createKey(input);
+                Optional<? super TOutput> cachedOutput = this.cache.get(cacheKey);
+                if (cachedOutput.isPresent()) {
+                    output = (TOutput) cachedOutput.get();
+                } else {
+                    long startTime = System.currentTimeMillis();
+                    output = delegate.execute(input);
+                    this.cache.save(output, cacheKey, startTime);
+                }
             }
         } catch (ReportedFailedException cve) { // includes ContractViolationReportedFailedException
             exception = cve;
@@ -163,6 +180,13 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 }
             }
         }
+    }
+
+    /**
+     * Creates the {@link com.forter.contracts.cache.CacheDAO} used in the class in case TInput supports caching.
+     */
+    protected CacheDAO<TOutput> createCacheDAO(Map stormConf, TopologyContext context) {
+        return new DummyCacheDAO<>();
     }
 
     private void emit(Object id, Object contract, BasicOutputCollector collector) {
