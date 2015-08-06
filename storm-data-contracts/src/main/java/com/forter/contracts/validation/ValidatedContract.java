@@ -1,7 +1,6 @@
 package com.forter.contracts.validation;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -21,13 +20,6 @@ public class ValidatedContract<T> {
     private final Optional<ValidationException> exception;
     private final T contract;
 
-    /**
-     * creates a valid contract
-     */
-    public ValidatedContract(T contract) {
-        this(contract, Sets.<ConstraintViolation<T>>newHashSet());
-    }
-
 
     public ValidatedContract(T contract, Set<ConstraintViolation<T>> violations) {
         this(contract, violations, Optional.<ValidationException>absent());
@@ -42,7 +34,7 @@ public class ValidatedContract<T> {
         this.violations = violations;
 
         /** TODO: Remove when https://github.com/forter/storm-data-contracts/issues/6 is resolved
-         * and the null check is removed from {@link OptionalUnwrapper#handleValidatedValue}
+         * and the null check is removed from {@link OptionalUnwrapperhandleValidatedValue}
          */
         this.exception = exception;
     }

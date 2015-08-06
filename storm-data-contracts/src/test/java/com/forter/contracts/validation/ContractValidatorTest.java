@@ -1,13 +1,12 @@
 package com.forter.contracts.validation;
 
-import com.forter.contracts.mocks.MockContractsBoltInput;
-import com.forter.contracts.mocks.MockContractsWithIpAddress;
-import com.forter.contracts.mocks.MockContractsWithListOutput;
-import com.forter.contracts.mocks.MockContractsWithOneOf;
+import com.forter.contracts.mocks.*;
 import com.google.common.base.Optional;
 import org.testng.annotations.Test;
 
+import javax.validation.ConstraintViolation;
 import java.util.LinkedList;
+import java.util.Set;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -31,7 +30,6 @@ public class ContractValidatorTest {
         contract.input1 = null;
         contract.optionalInput2 = Optional.of(1);
         ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
     }
 
@@ -41,8 +39,17 @@ public class ContractValidatorTest {
         contract.input1 = 1;
         contract.optionalInput2 = null;
         ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
+    }
+
+
+    @Test
+    public void testOptionalAbsent() {
+        MockContractsBoltInput contract = new MockContractsBoltInput();
+        contract.input1 = 1;
+        contract.optionalInput2 = Optional.absent();
+        ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isTrue();
     }
 
     @Test
@@ -53,7 +60,6 @@ public class ContractValidatorTest {
         contract.listOutput = new LinkedList<>();
 
         ValidatedContract<MockContractsWithListOutput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isTrue();
     }
 
@@ -65,7 +71,6 @@ public class ContractValidatorTest {
         contract.listOutput = null;
 
         ValidatedContract<MockContractsWithListOutput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
     }
 
@@ -100,4 +105,37 @@ public class ContractValidatorTest {
         ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
         assertThat(validationResult.isValid()).isTrue();
     }
+
+    @Test
+    void testLongIpV6AddressValid() {
+        MockContractsWithIpAddress contract = new MockContractsWithIpAddress();
+        contract.value = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+        ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isTrue();
+    }
+
+    @Test
+    void testShortIpV6AddressValid() {
+        MockContractsWithIpAddress contract = new MockContractsWithIpAddress();
+        contract.value = "2001:db8:85a3:0:0:8a2e:370:7334";
+        ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isTrue();
+    }
+
+    @Test
+    void testSuperShortIpV6AddressValid() {
+        MockContractsWithIpAddress contract = new MockContractsWithIpAddress();
+        contract.value = "2001:db8:85a3::8a2e:370:7334";
+        ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isTrue();
+    }
+
+    @Test
+    void testInvalidSuperShortIpV6AddressValid() {
+        MockContractsWithIpAddress contract = new MockContractsWithIpAddress();
+        contract.value = "2001:db8:85a3:::8a2e:370:7334";
+        ValidatedContract<?> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isFalse();
+    }
+
 }

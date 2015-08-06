@@ -1,6 +1,6 @@
 package com.forter.contracts.validation;
 
-import org.apache.commons.validator.routines.InetAddressValidator;
+import com.google.common.net.InetAddresses;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -19,6 +19,6 @@ public class IpAddressValidator  implements ConstraintValidator<IpAddress, Objec
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
-        return value == null || InetAddressValidator.getInstance().isValidInet4Address(String.valueOf(value));
+        return value == null || InetAddresses.isInetAddress(String.valueOf(value));
     }
 }
