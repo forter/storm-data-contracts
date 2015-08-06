@@ -42,7 +42,7 @@ public class ContractValidatorTest {
         assertThat(validationResult.isValid()).isFalse();
     }
 
-  
+
     @Test
     public void testOptionalAbsent() {
         MockContractsBoltInput contract = new MockContractsBoltInput();
