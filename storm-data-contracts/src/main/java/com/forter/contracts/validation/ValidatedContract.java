@@ -1,7 +1,6 @@
 package com.forter.contracts.validation;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -20,13 +19,6 @@ public class ValidatedContract<T> {
     private final Set<ConstraintViolation<T>> violations;
     private final Optional<ValidationException> exception;
     private final T contract;
-
-    /**
-     * creates a valid contract
-     */
-    public ValidatedContract(T contract) {
-        this(contract, Sets.<ConstraintViolation<T>>newHashSet());
-    }
 
 
     public ValidatedContract(T contract, Set<ConstraintViolation<T>> violations) {

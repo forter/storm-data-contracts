@@ -31,7 +31,6 @@ public class ContractValidatorTest {
         contract.input1 = null;
         contract.optionalInput2 = Optional.of(1);
         ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
     }
 
@@ -41,8 +40,16 @@ public class ContractValidatorTest {
         contract.input1 = 1;
         contract.optionalInput2 = null;
         ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
+    }
+
+    @Test
+    public void testOptionalAbsent() {
+        MockContractsBoltInput contract = new MockContractsBoltInput();
+        contract.input1 = 1;
+        contract.optionalInput2 = Optional.absent();
+        ValidatedContract<MockContractsBoltInput> validationResult = ContractValidator.instance().validate(contract);
+        assertThat(validationResult.isValid()).isTrue();
     }
 
     @Test
@@ -53,7 +60,6 @@ public class ContractValidatorTest {
         contract.listOutput = new LinkedList<>();
 
         ValidatedContract<MockContractsWithListOutput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isTrue();
     }
 
@@ -65,7 +71,6 @@ public class ContractValidatorTest {
         contract.listOutput = null;
 
         ValidatedContract<MockContractsWithListOutput> validationResult = ContractValidator.instance().validate(contract);
-        validationResult.toString();
         assertThat(validationResult.isValid()).isFalse();
     }
 
