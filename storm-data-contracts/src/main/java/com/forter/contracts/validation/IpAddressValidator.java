@@ -1,7 +1,6 @@
 package com.forter.contracts.validation;
 
 import com.google.common.net.InetAddresses;
-import org.apache.commons.validator.routines.InetAddressValidator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
