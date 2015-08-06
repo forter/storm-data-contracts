@@ -10,7 +10,8 @@ import org.hibernate.validator.spi.valuehandling.ValidatedValueUnwrapper;
 
 /**
  * Base class for {@link ValidatedValueUnwrapper}s based on ClassMate's type resolver.
- *
+ * A clone of {@link org.hibernate.validator.internal.engine.valuehandling}
+ * Cloned in order to change the constructor access modifier to public
  */
 public abstract class TypeResolverBasedValueUnwrapper<T> extends ValidatedValueUnwrapper<T> {
 

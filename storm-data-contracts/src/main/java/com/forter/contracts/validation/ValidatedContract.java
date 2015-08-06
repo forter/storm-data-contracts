@@ -34,7 +34,7 @@ public class ValidatedContract<T> {
         this.violations = violations;
 
         /** TODO: Remove when https://github.com/forter/storm-data-contracts/issues/6 is resolved
-         * and the null check is removed from {@link OptionalUnwrapper#handleValidatedValue}
+         * and the null check is removed from {@link OptionalUnwrapperhandleValidatedValue}
          */
         this.exception = exception;
     }
