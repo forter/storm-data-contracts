@@ -89,7 +89,14 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             }
             else {
                 TInput input = (TInput) validatedInputContract.getContract();
-                Map<String, Object> cacheKey = cacheKeyFilter.createKey(input);
+
+                Map<String, Object> cacheKey;
+                if(data instanceof ObjectNode) {
+                    cacheKey = cacheKeyFilter.createKey((ObjectNode)data);
+                } else {
+                    cacheKey = cacheKeyFilter.createKey(input);
+                }
+
                 Optional<? super TOutput> cachedOutput = this.cache.get(cacheKey);
                 if (cachedOutput.isPresent()) {
                     output = (TOutput) cachedOutput.get();
