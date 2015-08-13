@@ -9,8 +9,7 @@ import java.util.Map;
  */
 public interface CacheDAO<TOutput> {
 
-    public Optional<TOutput> get(Map<String, Object> key);
+    Optional<TOutput> get(Map<String, Object> key);
 
-    public void save(TOutput record, Map<String, Object> inputKey, long startTimeMillis);
-
+    void save(TOutput record, Map<String, Object> inputKey, long startTimeMillis);
 }

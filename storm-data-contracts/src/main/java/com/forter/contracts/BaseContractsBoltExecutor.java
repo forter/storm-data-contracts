@@ -90,21 +90,23 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             else {
                 TInput input = (TInput) validatedInputContract.getContract();
 
-                Map<String, Object> cacheKey;
+                Map<String, Object> cacheKeyData;
                 if(data instanceof ObjectNode) {
-                    cacheKey = cacheKeyFilter.createKey((ObjectNode)data);
+                    cacheKeyData = cacheKeyFilter.createKey((ObjectNode)data);
                 } else {
-                    cacheKey = cacheKeyFilter.createKey(input);
+                    cacheKeyData = cacheKeyFilter.createKey(input);
                 }
 
-                Optional<? super TOutput> cachedOutput = this.cache.get(cacheKey);
+                Optional<? super TOutput> cachedOutput = this.cache.get(cacheKeyData);
                 if (cachedOutput.isPresent()) {
                     output = (TOutput) cachedOutput.get();
                 } else {
                     long startTime = System.currentTimeMillis();
                     output = delegate.execute(input);
-                    this.cache.save(output, cacheKey, startTime);
+                    this.cache.save(output, cacheKeyData, startTime);
                 }
+
+                this.reportCacheStatus(cachedOutput.isPresent(), inputTuple);
             }
         } catch (ReportedFailedException cve) { // includes ContractViolationReportedFailedException
             exception = cve;
@@ -195,6 +197,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     protected CacheDAO<TOutput> createCacheDAO(Map stormConf, TopologyContext context) {
         return new DummyCacheDAO<>();
     }
+
+    protected void reportCacheStatus(Boolean status, Tuple tuple) {}
 
     private void emit(Object id, Object contract, BasicOutputCollector collector) {
         ArrayList<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
