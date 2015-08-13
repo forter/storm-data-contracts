@@ -47,6 +47,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient String id;
     private transient CacheDAO<? super TOutput> cache;
     private transient CacheKeyFilter cacheKeyFilter;
+    private transient boolean isCacheSupported;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -67,7 +68,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 validationResult.isValid(),
                 "Default output failed contract validation: %s",
                 validationResult.toString());
-        boolean isCacheSupported = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
+        this.isCacheSupported = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
         this.cache = isCacheSupported ? createCacheDAO(stormConf, context) : new DummyCacheDAO<TOutput>();
         this.cacheKeyFilter = new CacheKeyFilter(this.reflector.getInputClass());
     }
@@ -106,7 +107,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                     this.cache.save(output, cacheKeyData, startTime);
                 }
 
-                this.reportCacheStatus(cachedOutput.isPresent(), inputTuple);
+                if(this.isCacheSupported) {
+                    this.reportCacheStatus(cachedOutput.isPresent(), inputTuple);
+                }
             }
         } catch (ReportedFailedException cve) { // includes ContractViolationReportedFailedException
             exception = cve;
