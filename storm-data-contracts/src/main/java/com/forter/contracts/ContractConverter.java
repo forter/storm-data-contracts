@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Throwables;
+import com.sun.corba.se.impl.orbutil.ObjectWriter;
 
 import java.util.Collections;
 import java.util.Map;
@@ -64,6 +65,10 @@ public class ContractConverter {
 
     public Map convertContractToMap(Object contract) {
         return Collections.unmodifiableMap(mapper.convertValue(contract, Map.class));
+    }
+
+    public Map<String, Object> convertObjectNodeToMap(ObjectNode nodes) {
+        return mapper.convertValue(nodes, Map.class);
     }
 
     public String convertContractToJsonString(Object contract) {

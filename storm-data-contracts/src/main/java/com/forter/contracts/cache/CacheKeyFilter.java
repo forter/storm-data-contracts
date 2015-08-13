@@ -1,7 +1,7 @@
 package com.forter.contracts.cache;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.forter.contracts.ContractConverter;
-
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -21,8 +21,27 @@ public class CacheKeyFilter {
         }
     }
 
+    public Map<String, Object> createKey(ObjectNode input) {
+        //return null if no CacheKey is present
+        if(this.cachedKeys.size() == 0) {
+            return new HashMap<>();
+        }
+
+        Map<String, Object> filteredInput = ContractConverter.instance().convertObjectNodeToMap(input);
+        return createKeyFromMap(filteredInput);
+    }
+
     public Map<String, Object> createKey(Object input) {
+        //return null if no CacheKey is present
+        if(this.cachedKeys.size() == 0) {
+            return new HashMap<>();
+        }
+
         Map<String, Object> filteredInput = new HashMap<>(converter.convertContractToMap(input));
+        return createKeyFromMap(filteredInput);
+    }
+
+    private Map<String, Object> createKeyFromMap(Map<String, Object> filteredInput) {
         Iterator<String> fieldsIterator = filteredInput.keySet().iterator();
         while (fieldsIterator.hasNext()) {
             if (!cachedKeys.contains(fieldsIterator.next())) {
@@ -31,5 +50,6 @@ public class CacheKeyFilter {
         }
         return filteredInput;
     }
+
 
 }
