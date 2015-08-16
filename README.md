@@ -1,5 +1,7 @@
-storm-data-contracts
+storm-data-contracts 
 ====================
+
+[![Build Status](https://img.shields.io/travis/forter/storm-data-contracts.svg)](https://ci.appveyor.com/project/jshint/jshint/branch/master)
 
 This project let's you write Storm Bolts in Java with strict data contracts:
 
