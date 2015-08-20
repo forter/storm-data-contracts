@@ -1,17 +1,8 @@
 package com.forter.contracts;
 
-import static com.google.common.collect.Iterables.*;
-
-import com.forter.contracts.cache.CacheDAO;
-import com.forter.contracts.cache.CacheKeyFilter;
-import com.forter.contracts.cache.Cached;
-import com.forter.contracts.cache.DummyCacheDAO;
-import com.forter.contracts.reflection.ContractsBoltReflector;
-import com.forter.contracts.validation.ContractValidator;
-import com.forter.contracts.validation.ValidatedContract;
-
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.BasicOutputCollector;
+import backtype.storm.topology.FailedException;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.ReportedFailedException;
 import backtype.storm.topology.base.BaseBasicBolt;
@@ -20,6 +11,13 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.utils.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.forter.contracts.cache.CacheDAO;
+import com.forter.contracts.cache.CacheKeyFilter;
+import com.forter.contracts.cache.Cached;
+import com.forter.contracts.cache.DummyCacheDAO;
+import com.forter.contracts.reflection.ContractsBoltReflector;
+import com.forter.contracts.validation.ContractValidator;
+import com.forter.contracts.validation.ValidatedContract;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -27,12 +25,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import static com.google.common.collect.Iterables.*;
 
 /**
  * Bolt base class that uses Data Objects for input and output.
@@ -87,13 +86,12 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             if (!validatedInputContract.isValid()) {
                 handleInputError(validatedInputContract, this.id, inputTuple);
                 return;
-            }
-            else {
+            } else {
                 TInput input = (TInput) validatedInputContract.getContract();
 
                 Map<String, Object> cacheKeyData;
-                if(data instanceof ObjectNode) {
-                    cacheKeyData = cacheKeyFilter.createKey((ObjectNode)data);
+                if (data instanceof ObjectNode) {
+                    cacheKeyData = cacheKeyFilter.createKey((ObjectNode) data);
                 } else {
                     cacheKeyData = cacheKeyFilter.createKey(input);
                 }
@@ -107,11 +105,11 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                     this.cache.save(output, cacheKeyData, startTime);
                 }
 
-                if(this.isCacheSupported) {
+                if (this.isCacheSupported) {
                     this.reportCacheStatus(cachedOutput.isPresent(), inputTuple);
                 }
             }
-        } catch (ReportedFailedException cve) { // includes ContractViolationReportedFailedException
+        } catch (FailedException cve) { // includes ContractViolationReportedFailedException
             exception = cve;
         } catch (RuntimeException e) {
             exception = new ReportedFailedException(e);
@@ -122,8 +120,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             if (output == null) {
                 outputContracts = ImmutableList.of();
                 invalidOutputContracts = ImmutableList.of(validationTransformation.apply(output));
-            }
-            else {
+            } else {
                 outputContracts = iterableContracts(output);
                 invalidOutputContracts = filter(transform(outputContracts, validationTransformation), isInvalidPredicate);
             }
@@ -132,8 +129,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 for (Object contract : outputContracts) {
                     emit(id, contract, collector);
                 }
-            }
-            else {
+            } else {
                 emit(id, defaultOutput, collector);
                 exception = new ContractViolationReportedFailedException(invalidOutputContracts, this.id);
             }
@@ -181,8 +177,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         }
         if (isOfTypeInput(contract)) {
             return (TInput) contract;
-        }
-        else {
+        } else {
             //lock is needed to ensure no threads are iterating over the contract in parallel
             synchronized (contract) {
                 if (contract instanceof ObjectNode) {
@@ -201,7 +196,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         return new DummyCacheDAO<>();
     }
 
-    protected void reportCacheStatus(Boolean status, Tuple tuple) {}
+    protected void reportCacheStatus(Boolean status, Tuple tuple) {
+    }
 
     private void emit(Object id, Object contract, BasicOutputCollector collector) {
         ArrayList<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
@@ -212,7 +208,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
         switch (reflector.getExecuteReturnType()) {
             case NOT_NULL_CONTRACT:
-                return ImmutableList.of((Object)output);
+                return ImmutableList.of((Object) output);
 
             case OPTIONAL_CONTRACT:
                 Optional optional = (Optional) output;

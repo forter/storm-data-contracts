@@ -1,9 +1,9 @@
 storm-data-contracts 
 ====================
 
-[![Build Status](https://img.shields.io/travis/forter/storm-data-contracts.svg)](https://ci.appveyor.com/project/jshint/jshint/branch/master)
+[![Build Status](https://img.shields.io/travis/forter/storm-data-contracts.svg)](https://travis-ci.org/forter/storm-data-contracts/)
 
-This project let's you write Storm Bolts in Java with strict data contracts:
+This project lets you write Storm Bolts in Java with strict data contracts:
 
 Strongly Typed
 --------------
