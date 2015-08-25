@@ -9,9 +9,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import org.hibernate.validator.valuehandling.UnwrapValidatedValue;
 
+import javax.validation.constraints.AssertFalse;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,6 +84,18 @@ public class ContractsBoltReflector<TInput, TOutput, TContractsBolt extends ICon
             else {
                 checkNoAnnotation(contractClass, field, UnwrapValidatedValue.class);
                 checkAnnotation(contractClass, field,NotNull.class);
+            }
+        }
+
+        for(Method method : contractClass.getMethods()) {
+            if(method.isAnnotationPresent(AssertTrue.class) || method.isAnnotationPresent(AssertFalse.class)) {
+                if(method.getReturnType() != boolean.class && method.getReturnType() != Boolean.class) {
+                    throw new IllegalStateException("AssertTrue or AssertFalse annotations must be placed above methods that return boolean value");
+                }
+
+                if(!method.getName().startsWith("is")) {
+                    throw new IllegalStateException("Methods annotated with AssertTrue or AssertFalse must start with \"is\"");
+                }
             }
         }
     }
