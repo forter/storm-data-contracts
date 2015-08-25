@@ -29,6 +29,18 @@ public class ContractsBoltReflectorTest {
     }
 
     @Test
+    public void testAssertionCheck() {
+        boolean ok  = false;
+        try {
+            new ContractsBoltReflector(new MockAssertionBolt());
+        } catch (IllegalStateException ex) {
+            ok = true; //the reflector should have thrown since the bolt input/output are invalid
+        }
+
+        assertThat(ok).isTrue();
+    }
+
+    @Test
     public void testOptionalContract() {
         ContractsBoltReflector reflector = new ContractsBoltReflector(new MockOptionalContractsBolt());
         assertThat(reflector.getExecuteReturnType()).isEqualTo(ContractsBoltReflector.EXECUTE_RETURN_TYPE.OPTIONAL_CONTRACT);
