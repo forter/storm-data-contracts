@@ -29,6 +29,7 @@ import javax.validation.ValidationException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Iterables.*;
@@ -47,6 +48,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient CacheDAO<? super TOutput> cache;
     private transient CacheKeyFilter cacheKeyFilter;
     private transient boolean isCacheSupported;
+    private transient boolean isEnrichmentBolt;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -70,6 +72,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         this.isCacheSupported = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
         this.cache = isCacheSupported ? createCacheDAO(stormConf, context) : new DummyCacheDAO<TOutput>();
         this.cacheKeyFilter = new CacheKeyFilter(this.reflector.getInputClass());
+        this.isEnrichmentBolt = this.delegate.getClass().isAnnotationPresent(EnrichmentBolt.class);
     }
 
     @Override
@@ -127,10 +130,10 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
             if (isEmpty(invalidOutputContracts)) {
                 for (Object contract : outputContracts) {
-                    emit(id, contract, collector);
+                    emit(id, contract, inputTuple, collector);
                 }
             } else {
-                emit(id, defaultOutput, collector);
+                emit(id, defaultOutput, inputTuple, collector);
                 exception = new ContractViolationReportedFailedException(invalidOutputContracts, this.id);
             }
         }
@@ -199,8 +202,20 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     protected void reportCacheStatus(Boolean status, Tuple tuple) {
     }
 
-    private void emit(Object id, Object contract, BasicOutputCollector collector) {
-        ArrayList<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
+    /**
+     * Override this method for different merge strategies
+     */
+    protected List<Object> mergeTuples(List<Object> update, Tuple originalInput) {
+        return update;
+    }
+
+    private void emit(Object id, Object contract, Tuple originalInput, BasicOutputCollector collector) {
+        List<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
+
+        if(this.isEnrichmentBolt) {
+            tuple = this.mergeTuples(tuple, originalInput);
+        }
+
         collector.emit(Utils.DEFAULT_STREAM_ID, tuple);
     }
 
