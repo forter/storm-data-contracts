@@ -27,10 +27,7 @@ import com.google.common.collect.Lists;
 
 import javax.validation.ValidationException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.collect.Iterables.*;
 
@@ -203,17 +200,26 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     }
 
     /**
-     * Override this method for different merge strategies
+     * Override this method for different merging/enrichment strategies
      */
-    protected List<Object> mergeTuples(List<Object> update, Tuple originalInput) {
+    protected List<Object> enrichAttributes(List<Object> update, Tuple originalInput) {
+        Map<String, Object> finalAttributes = new HashMap<>();
+        finalAttributes.putAll((Map<String, Object>)originalInput.getValue(1));
+        finalAttributes.putAll((Map<String, Object>)update.get(1));
+        update.set(1, finalAttributes);
+
         return update;
     }
 
+    protected List<Object> createOutputTuple(Object id, Object contract) {
+        return Lists.newArrayList(id, transformOutput(contract));
+    }
+
     private void emit(Object id, Object contract, Tuple originalInput, BasicOutputCollector collector) {
-        List<Object> tuple = Lists.newArrayList(id, transformOutput(contract));
+        List<Object> tuple = this.createOutputTuple(id, contract);
 
         if(this.isEnrichmentBolt) {
-            tuple = this.mergeTuples(tuple, originalInput);
+            tuple = this.enrichAttributes(tuple, originalInput);
         }
 
         collector.emit(Utils.DEFAULT_STREAM_ID, tuple);
