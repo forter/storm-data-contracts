@@ -192,12 +192,9 @@ public class ToMapContractsBoltExecutor<TInput, TOutput, TContractsBolt extends 
 
 Enrichment Bolts
 -----
-Normally, contract bolts will "absorb" any attribute that passes by them. This means that the only attributes available
-to any bolt connected after a contract bolt will be the attributes specified in the output of that contract bolt.
+Normally, contract bolts will "absorb" any attribute that passes by them. This means that the only attributes available to any bolt connected after a contract bolt will be the attributes specified in the output of that contract bolt.
 One way around this is doing an old-fashioned join, but this because very hard to maintain if dealing with a large topology.
-A quick solution around this is the use of the `@EnrichmentBolt` annotation, which will indicate to the ContractBoltExecutor
-that this bolt is in "upsert" mode to the attributes map: it will only append (or update, if  already existent) to it and will let
-the other attributes bypass it for the next bolts to use.
+A quick solution around this is the use of the `@EnrichmentBolt` annotation, which will indicate to the ContractBoltExecutor that this bolt is in "upsert" mode to the attributes map: it will only append (or update, if  already existent) to it and will let the other attributes bypass it for the next bolts to use.
 ```
 @EnrichmentBolt
 public class MyEnrichmentBolt extends BaseContractBolt<MyInput, MyOutput> {
