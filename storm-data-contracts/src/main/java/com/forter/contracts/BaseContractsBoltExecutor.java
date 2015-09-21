@@ -204,15 +204,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
      */
     protected List<Object> enrichAttributes(List<Object> update, Tuple originalInput) {
         Map<String, Object> finalAttributes = new HashMap<>();
-        finalAttributes.putAll((Map<String, Object>) originalInput.getValue(1));
-
-        // Prefer not to overwrite with nulls if a non-null value is in the original input.
-        for(Map.Entry<String, Object> entry: ((Map<String, Object>)update.get(1)).entrySet()) {
-            if(entry.getValue() != null || !finalAttributes.containsKey(entry.getKey())) {
-                finalAttributes.put(entry.getKey(), entry.getValue());
-            }
-        }
-
+        finalAttributes.putAll((Map<String, Object>)originalInput.getValue(1));
+        finalAttributes.putAll((Map<String, Object>)update.get(1));
         update.set(1, finalAttributes);
 
         return update;
