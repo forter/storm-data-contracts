@@ -16,7 +16,12 @@ public class CacheKeyFilter {
     public CacheKeyFilter(Class<?> cachedClass) {
         for (Field field : cachedClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(CacheKey.class)) {
-                cachedKeys.add(field.getName());
+                String cachedFieldName = field.getAnnotation(CacheKey.class).value();
+                if (cachedFieldName.isEmpty()) {
+                    cachedKeys.add(field.getName());
+                } else {
+                    cachedKeys.add(cachedFieldName);
+                }
             }
         }
     }
