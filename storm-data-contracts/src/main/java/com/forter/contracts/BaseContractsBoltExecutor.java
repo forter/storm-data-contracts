@@ -75,7 +75,6 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     @Override
     public void execute(Tuple inputTuple, BasicOutputCollector collector) {
         TOutput output = defaultOutput;
-        Boolean isValidInput = true;
         RuntimeException exception = null;
 
         final Object id = inputTuple.getValue(0);
@@ -85,7 +84,6 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
             if (!validatedInputContract.isValid()) {
                 handleInputError(validatedInputContract, this.id, inputTuple);
-                isValidInput = false;
                 return;
             } else {
                 TInput input = (TInput) validatedInputContract.getContract();
@@ -128,10 +126,10 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
 
             if (isEmpty(invalidOutputContracts)) {
                 for (Object contract : outputContracts) {
-                    emit(id, contract, inputTuple, collector,isValidInput);
+                    emit(id, contract, inputTuple, collector);
                 }
             } else {
-                emit(id, defaultOutput, inputTuple, collector,isValidInput);
+                emit(id, defaultOutput, inputTuple, collector);
                 exception = new ContractViolationReportedFailedException(invalidOutputContracts, this.id);
             }
         }
@@ -203,11 +201,14 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     /**
      * Override this method for different merging/enrichment strategies
      */
-    protected List<Object> enrichAttributes(List<Object> update, Tuple originalInput , Boolean isValidInput) {
+    protected List<Object> enrichAttributes(List<Object> update, Tuple originalInput) {
         Map<String, Object> finalAttributes = new HashMap<>();
         finalAttributes.putAll((Map<String, Object>)originalInput.getValue(1));
-        if (isValidInput){
-            finalAttributes.putAll((Map<String, Object>)update.get(1));}
+        for (Map.Entry<String, Object> updatedAttribute : ((Map<String, Object>)update.get(1)).entrySet()) {
+            if (updatedAttribute.getValue() != null) {
+                finalAttributes.put(updatedAttribute.getKey(), updatedAttribute.getValue());
+            }
+        }
         update.set(1, finalAttributes);
 
         return update;
@@ -217,11 +218,11 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         return Lists.newArrayList(id, transformOutput(contract));
     }
 
-    private void emit(Object id, Object contract, Tuple originalInput, BasicOutputCollector collector, Boolean isInputValid) {
+    private void emit(Object id, Object contract, Tuple originalInput, BasicOutputCollector collector) {
         List<Object> tuple = this.createOutputTuple(id, contract);
 
         if(this.isEnrichmentBolt) {
-            tuple = this.enrichAttributes(tuple, originalInput, isInputValid);
+            tuple = this.enrichAttributes(tuple, originalInput);
         }
 
         collector.emit(Utils.DEFAULT_STREAM_ID, tuple);
