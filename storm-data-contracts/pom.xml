@@ -5,7 +5,7 @@
     <parent>
         <artifactId>storm-data-contracts-parent</artifactId>
         <groupId>com.forter</groupId>
-        <version>0.2.25</version>
+        <version>0.2.26</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -23,7 +23,7 @@
             <version>5.2.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>com.forter.com.fasterxml.jackson.datatype</groupId>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-guava</artifactId>
         </dependency>
         <dependency>

@@ -31,16 +31,20 @@ public class ContractFactory<T> {
     }
 
     private static <T> void initializeOptionalAsAbsent(T instance) {
-        Field[] fields = instance.getClass().getFields();
-        for (Field field : fields) {
-            Class fieldType = field.getType();
-            if (Optional.class.isAssignableFrom(fieldType)) {
-                try {
-                    field.set(instance, Optional.absent());
-                } catch (IllegalAccessException e) {
-                    throw Throwables.propagate(e);
+        Class<?> clazz = instance.getClass();
+        while (clazz != null && clazz != Object.class) {
+            Field[] fields = instance.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                Class fieldType = field.getType();
+                if (Optional.class.isAssignableFrom(fieldType)) {
+                    try {
+                        field.set(instance, Optional.absent());
+                    } catch (IllegalAccessException e) {
+                        throw Throwables.propagate(e);
+                    }
                 }
             }
+            clazz = clazz.getSuperclass();
         }
     }
 
