@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +34,7 @@ public class BaseContractsBoltExecutorTest {
     final String id = "1";
 
     @Test
-    public void testContractsBolt() {
+    public void testContractsBoltWithJsonInput() {
         //mock copies input to output
         ObjectNode data = parseJson("{\"input1\":-1,\"optionalInput2\":-1}");
         MockContractsBoltOutput output = new MockContractsBoltOutput();
@@ -43,6 +44,19 @@ public class BaseContractsBoltExecutorTest {
         BasicOutputCollector collector = execute(data, contractsBolt);
         assertEmitEquals(collector, output);
     }
+
+    @Test
+    public void testContractsBoltWithMapInput() {
+        //mock copies input to output
+        Map<String, Object> data = ImmutableMap.of("input1", (Object) new Integer(-1));
+        MockContractsBoltOutput output = new MockContractsBoltOutput();
+        output.output1 = -1;
+        output.optionalOutput2 = Optional.absent();
+        IContractsBolt contractsBolt = new MockContractsBolt();
+        BasicOutputCollector collector = execute(data, contractsBolt);
+        assertEmitEquals(collector, output);
+    }
+
 
     @Test
     public void testCachedExecution() {
@@ -201,25 +215,25 @@ public class BaseContractsBoltExecutorTest {
 
     }
 
-    private BasicOutputCollector execute(ObjectNode input, IContractsBolt bolt) {
+    private BasicOutputCollector execute(Object input, IContractsBolt bolt) {
         BasicOutputCollector collector = mock(BasicOutputCollector.class);
         execute(input, bolt, collector);
         return collector;
     }
 
-    private BasicOutputCollector execute(ObjectNode input, BaseContractsBoltExecutor executor) {
+    private BasicOutputCollector execute(Object input, BaseContractsBoltExecutor executor) {
         BasicOutputCollector collector = mock(BasicOutputCollector.class);
         execute(input, executor, collector);
         return collector;
     }
 
-    private void execute(ObjectNode input, IContractsBolt bolt, BasicOutputCollector collector) {
+    private void execute(Object input, IContractsBolt bolt, BasicOutputCollector collector) {
         BaseContractsBoltExecutor baseContractsBoltExecutor = new BaseContractsBoltExecutor(bolt);
         baseContractsBoltExecutor.prepare(mock(Map.class), mock(TopologyContext.class));
         execute(input, baseContractsBoltExecutor, collector);
     }
 
-    private void execute(ObjectNode input, BaseContractsBoltExecutor executor, BasicOutputCollector collector) {
+    private void execute(Object input, BaseContractsBoltExecutor executor, BasicOutputCollector collector) {
         Tuple tuple = mock(Tuple.class);
         when(tuple.getValue(0)).thenReturn(id);
         when(tuple.getValue(1)).thenReturn(input);
