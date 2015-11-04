@@ -12,4 +12,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface EnrichmentBolt {
 
+    String[] fieldsToOmit() default {};
+
 }

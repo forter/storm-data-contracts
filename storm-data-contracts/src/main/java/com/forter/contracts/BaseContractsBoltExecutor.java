@@ -46,6 +46,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private transient CacheKeyFilter cacheKeyFilter;
     private transient boolean isCacheSupported;
     private transient boolean isEnrichmentBolt;
+    private transient Set<String> outputFieldsToOmit;
 
     public BaseContractsBoltExecutor(TContractsBolt contractsBolt) {
         this.delegate = contractsBolt;
@@ -70,6 +71,13 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         this.cache = isCacheSupported ? createCacheDAO(stormConf, context) : new DummyCacheDAO<TOutput>();
         this.cacheKeyFilter = new CacheKeyFilter(this.reflector.getInputClass());
         this.isEnrichmentBolt = this.delegate.getClass().isAnnotationPresent(EnrichmentBolt.class);
+        this.outputFieldsToOmit = new HashSet<>();
+        if (this.isEnrichmentBolt) {
+            EnrichmentBolt enrichmentAnnotation = this.delegate.getClass().getAnnotation(EnrichmentBolt.class);
+            for (String field : enrichmentAnnotation.fieldsToOmit()) {
+                outputFieldsToOmit.add(field);
+            }
+        }
     }
 
     @Override
@@ -208,6 +216,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
             if (updatedAttribute.getValue() != null) {
                 finalAttributes.put(updatedAttribute.getKey(), updatedAttribute.getValue());
             }
+        }
+        for (String field : outputFieldsToOmit) {
+            finalAttributes.put(field, null);
         }
         update.set(1, finalAttributes);
 
