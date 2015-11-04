@@ -27,6 +27,6 @@ public class ContractFactoryTest {
         assertThat(input.x).isNull();
         assertThat(input.y.isPresent()).isFalse();
         assertThat(input.z).isNull();
-        assertThat(input.a.isPresent()).isFalse();
+        assertThat(input.getA().isPresent()).isFalse();
     }
 }

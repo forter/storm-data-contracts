@@ -38,6 +38,7 @@ public class ContractFactory<T> {
                 Class fieldType = field.getType();
                 if (Optional.class.isAssignableFrom(fieldType)) {
                     try {
+                        field.setAccessible(true);
                         field.set(instance, Optional.absent());
                     } catch (IllegalAccessException e) {
                         throw Throwables.propagate(e);

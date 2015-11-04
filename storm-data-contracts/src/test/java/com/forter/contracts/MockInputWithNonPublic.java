@@ -20,5 +20,9 @@ public class MockInputWithNonPublic {
     Integer z;
 
     @UnwrapValidatedValue
-    Optional<String> a;
+    private Optional<String> a;
+
+    public Optional<String> getA() {
+        return a;
+    }
 }
