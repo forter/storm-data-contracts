@@ -213,7 +213,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         Map<String, Object> finalAttributes = new HashMap<>();
         finalAttributes.putAll((Map<String, Object>)originalInput.getValue(1));
         for (Map.Entry<String, Object> updatedAttribute : ((Map<String, Object>)update.get(1)).entrySet()) {
-            if (updatedAttribute.getValue() != null) {
+            if (updatedAttribute.getValue() != null || !finalAttributes.containsKey(updatedAttribute.getKey())) {
                 finalAttributes.put(updatedAttribute.getKey(), updatedAttribute.getValue());
             }
         }
