@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 public @interface CacheKey {
 
-    String value() default "";
+    Class<? extends CacheKeyTransformer>[] transformers() default {};
 }

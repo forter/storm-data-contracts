@@ -105,6 +105,26 @@ public class MyCachedContractBoltExecutor<TInput, TOutput, TContractsBolt extend
 
 }
 ```
+@CacheKey supports transformation of input for cache purposes (without changing the input the bolt receives in case of
+cache miss). For example:
+```
+@Cached
+public class Input {
+
+    @Max(10)
+    @NotNull
+    @CacheKey(transformers = {LowerCaseTransformer.class})
+    public String input1;
+}
+
+public class LowerCaseTransformer implements CacheKeyTransformer {
+
+    public Object transform(Object key) {
+        return ((String) key).toLowerCase();
+    }
+}
+
+```
 
 
 CSV driven unit tests 
