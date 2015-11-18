@@ -16,7 +16,7 @@ public class MockContractsBoltInput {
 
     @Max(10)
     @NotNull
-    @CacheKey
+    @CacheKey(transformers = {MockCacheKeyTransformer.class})
     public Integer input1;
 
     @Max(10)
