@@ -84,7 +84,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     public void execute(Tuple inputTuple, BasicOutputCollector collector) {
         TOutput output = defaultOutput;
         RuntimeException exception = null;
-
+        boolean foundCache = false;
         final Object id = inputTuple.getValue(0);
         try {
             final Object data = inputTuple.getValue(1);
@@ -104,16 +104,13 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
                 }
 
                 Optional<? super TOutput> cachedOutput = this.cache.get(cacheKeyData);
-                if (cachedOutput.isPresent()) {
+                foundCache = cachedOutput.isPresent();
+                if (foundCache) {
                     output = (TOutput) cachedOutput.get();
                 } else {
                     long startTime = System.currentTimeMillis();
                     output = delegate.execute(input);
                     this.cache.save(output, cacheKeyData, startTime);
-                }
-
-                if (this.isCacheSupported) {
-                    this.reportCacheStatus(cachedOutput.isPresent(), inputTuple);
                 }
             }
         } catch (FailedException cve) { // includes ContractViolationReportedFailedException
@@ -121,6 +118,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         } catch (RuntimeException e) {
             exception = new ReportedFailedException(e);
         } finally {
+            if (this.isCacheSupported) {
+                this.reportCacheStatus(foundCache, inputTuple);
+            }
             Iterable<Object> outputContracts;
             Iterable<ValidatedContract> invalidOutputContracts;
 
