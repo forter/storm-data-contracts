@@ -84,7 +84,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     public void execute(Tuple inputTuple, BasicOutputCollector collector) {
         TOutput output = defaultOutput;
         RuntimeException exception = null;
-        boolean foundCache = false;
+        Boolean foundCache = null;
         final Object id = inputTuple.getValue(0);
         try {
             final Object data = inputTuple.getValue(1);
@@ -118,7 +118,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         } catch (RuntimeException e) {
             exception = new ReportedFailedException(e);
         } finally {
-            if (this.isCacheSupported) {
+            if (this.isCacheSupported && foundCache != null) {
                 this.reportCacheStatus(foundCache, inputTuple);
             }
             Iterable<Object> outputContracts;
