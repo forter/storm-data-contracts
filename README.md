@@ -8,7 +8,7 @@ This project lets you write Storm Bolts in Java with strict data contracts:
 Strongly Typed
 --------------
 Bolt input and output are POJOs
-```
+```java
 public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutput>> {
     @Override
     public Collection<MyBoltOutput> execute(MyBoltInput input) {
@@ -32,7 +32,7 @@ public class MyBolt implements IContractsBolt<MyBoltInput,Collection<MyBoltOutpu
 Input and Output Data Contracts
 -------------------------------
 Support Guava Optional and Hibernate Validator for strict data contracts
-```
+```java
 public class MyBoltInput {
     @NotNull
     @Min(0)
@@ -63,7 +63,7 @@ BaseContractsBoltExecutor supports adding a caching mechanism via inheritance an
 BaseContractsBoltExecutor#createCacheDAO.
 Cached input contracts should be annotated with @Cached annotation and fields which are used as cache keys should be
 annotated with @CacheKey
-```
+```java
 @Cached
 public class Input {
 
@@ -107,7 +107,7 @@ public class MyCachedContractBoltExecutor<TInput, TOutput, TContractsBolt extend
 ```
 @CacheKey supports transformation of input for cache purposes (without changing the input the bolt receives in case of
 cache miss). For example:
-```
+```java
 @Cached
 public class Input {
 
@@ -141,7 +141,7 @@ input.x,input.y,output.z
 
 *src/test/java/MyTest.java*
 
-```
+```java
 public class MyBoltTest {
 
     private MyBolt bolt;
@@ -174,7 +174,7 @@ public class MyBoltTest {
 
 Adding Bolt into a Topology
 ---------------------------
-```
+```java
 TopologyBuilder builder = new TopologBuilder();
 builder.setBolt("myContractsBolt",new BaseContractsBoltExecutor(new MyContractsBolt()))
 
@@ -196,7 +196,7 @@ The bolt emits a pair tuple (such as [id, data]).
 The second item of the pair is a MyBoltOutput`
 
 This behavior can be modified by overriding the BaseContractsBoltExecutor#transformOutput() method:
-```
+```java
 public class ToMapContractsBoltExecutor<TInput, TOutput, TContractsBolt extends IContractsBolt<TInput, TOutput>> extends BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt> {
 
     public ToMapContractsBoltExecutor(TContractsBolt contractsBolt) {
@@ -215,7 +215,7 @@ Enrichment Bolts
 Normally, contract bolts will "absorb" any attribute that passes by them. This means that the only attributes available to any bolt connected after a contract bolt will be the attributes specified in the output of that contract bolt.
 One way around this is doing an old-fashioned join, but this because very hard to maintain if dealing with a large topology.
 A quick solution around this is the use of the `@EnrichmentBolt` annotation, which will indicate to the ContractBoltExecutor that this bolt is in "upsert" mode to the attributes map: it will only append (or update, if  already existent) to it and will let the other attributes bypass it for the next bolts to use.
-```
+```java
 @EnrichmentBolt
 public class MyEnrichmentBolt extends BaseContractBolt<MyInput, MyOutput> {
     // This bolt will allow attributes not in its input/output pass right through it
