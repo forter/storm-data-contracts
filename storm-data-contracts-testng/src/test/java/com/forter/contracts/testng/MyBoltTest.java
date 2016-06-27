@@ -1,6 +1,6 @@
 package com.forter.contracts.testng;
 
-import backtype.storm.task.TopologyContext;
+import org.apache.storm.task.TopologyContext;
 import com.forter.contracts.validation.ContractValidator;
 import com.google.common.collect.Iterables;
 import org.testng.annotations.AfterClass;

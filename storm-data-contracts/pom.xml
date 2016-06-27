@@ -5,7 +5,7 @@
     <parent>
         <artifactId>storm-data-contracts-parent</artifactId>
         <groupId>com.forter</groupId>
-        <version>0.2.33</version>
+        <version>0.2.34</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -52,7 +52,7 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.esotericsoftware.kryo</groupId>
+            <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
         </dependency>
         <dependency>

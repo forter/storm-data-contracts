@@ -6,17 +6,17 @@
 
     <groupId>com.forter</groupId>
     <artifactId>storm-data-contracts-parent</artifactId>
-    <version>0.2.33</version>
+    <version>0.2.34</version>
     <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate-validator.version>5.2.1.Final</hibernate-validator.version>
         <jackson.version>2.6.1</jackson.version>
-        <storm.version>0.10.0</storm.version>
+        <storm.version>1.0.1</storm.version>
         <slf4j.version>1.7.7</slf4j.version>
         <logback.version>1.1.2</logback.version>
-        <kryo.version>2.21</kryo.version>
+        <kryo.version>3.0.3</kryo.version>
     </properties>
 
     <modules>
@@ -155,7 +155,7 @@
                 <version>17.0</version>
             </dependency>
             <dependency>
-                <groupId>com.esotericsoftware.kryo</groupId>
+                <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo</artifactId>
                 <version>${kryo.version}</version>
             </dependency>
