@@ -1,6 +1,6 @@
 package com.forter.contracts;
 
-import org.apache.storm.topology.ReportedFailedException;
+import backtype.storm.topology.ReportedFailedException;
 import com.forter.contracts.validation.ValidatedContract;
 
 /**

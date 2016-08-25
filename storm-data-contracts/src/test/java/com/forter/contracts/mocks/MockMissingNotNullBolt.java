@@ -1,7 +1,7 @@
 package com.forter.contracts.mocks;
 
 
-import org.apache.storm.task.TopologyContext;
+import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
 import com.google.common.base.Optional;
 

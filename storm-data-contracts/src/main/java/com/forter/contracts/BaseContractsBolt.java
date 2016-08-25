@@ -1,6 +1,6 @@
 package com.forter.contracts;
 
-import org.apache.storm.task.TopologyContext;
+import backtype.storm.task.TopologyContext;
 
 import java.util.Map;
 
