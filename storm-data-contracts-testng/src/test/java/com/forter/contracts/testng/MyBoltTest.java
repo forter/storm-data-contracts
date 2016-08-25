@@ -1,6 +1,6 @@
 package com.forter.contracts.testng;
 
-import org.apache.storm.task.TopologyContext;
+import backtype.storm.task.TopologyContext;
 import com.forter.contracts.validation.ContractValidator;
 import com.google.common.collect.Iterables;
 import org.testng.annotations.AfterClass;
@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 import java.util.Collection;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertTrue;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
@@ -27,7 +26,7 @@ public class MyBoltTest {
     @BeforeClass
     public void before() {
         bolt = new MyBolt();
-        bolt.prepare(mock(Map.class),mock(TopologyContext.class));
+        bolt.prepare(mock(Map.class), mock(TopologyContext.class));
     }
 
     @AfterClass
