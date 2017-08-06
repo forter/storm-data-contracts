@@ -1,7 +1,7 @@
 package com.forter.contracts;
 
-import backtype.storm.topology.ReportedFailedException;
 import com.forter.contracts.validation.ValidatedContract;
+import org.apache.storm.topology.ReportedFailedException;
 
 /**
  * A reusable adapter class between {@link com.forter.contracts.validation.ValidatedContract} and {@link java.lang.RuntimeException}
