@@ -1,8 +1,8 @@
 package com.forter.contracts.mocks;
 
-import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
 import com.google.common.collect.Lists;
+import org.apache.storm.task.TopologyContext;
 
 import java.util.Collection;
 import java.util.Map;
