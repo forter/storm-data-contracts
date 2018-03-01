@@ -2,10 +2,6 @@ package com.forter.contracts.mocks;
 
 import com.forter.contracts.BaseContractsBolt;
 
-import backtype.storm.task.TopologyContext;
-
-import java.util.Map;
-
 /**
  * A Mock for testing inheriting the generic execute method.
  */

@@ -1,7 +1,8 @@
 package com.forter.contracts.mocks;
 
-import backtype.storm.task.TopologyContext;
 import com.forter.contracts.IContractsBolt;
+import org.apache.storm.task.TopologyContext;
+
 import java.util.Map;
 
 public class MockAssertionBolt implements IContractsBolt<MockAssertionContract, MockAssertionContract> {

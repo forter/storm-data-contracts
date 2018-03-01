@@ -1,10 +1,9 @@
 package com.forter.contracts.mocks;
 
-import backtype.storm.task.TopologyContext;
 import com.forter.contracts.BaseContractsBoltExecutor;
 import com.forter.contracts.IContractsBolt;
 import com.forter.contracts.cache.CacheDAO;
-import com.google.common.base.Optional;
+import org.apache.storm.task.TopologyContext;
 
 import java.util.Map;
 
