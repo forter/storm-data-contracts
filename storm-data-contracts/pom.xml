@@ -5,7 +5,7 @@
     <parent>
         <artifactId>storm-data-contracts-parent</artifactId>
         <groupId>com.forter</groupId>
-        <version>0.2.39</version>
+        <version>0.2.40</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -87,12 +87,6 @@
             <groupId>org.unitils</groupId>
             <artifactId>unitils-core</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.0</version>
-            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>
