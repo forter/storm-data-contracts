@@ -1,6 +1,5 @@
 package com.forter.contracts.validation;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -17,19 +16,19 @@ import java.util.Set;
 public class ValidatedContract<T> {
 
     private final Set<ConstraintViolation<T>> violations;
-    private final Optional<ValidationException> exception;
+    private final ValidationException exception;
     private final T contract;
 
 
     public ValidatedContract(T contract, Set<ConstraintViolation<T>> violations) {
-        this(contract, violations, Optional.absent());
+        this(contract, violations, null);
     }
 
     public ValidatedContract(T contract, ValidationException e) {
-        this(contract, Sets.newHashSet(), Optional.of(e));
+        this(contract, Sets.newHashSet(), e);
     }
 
-    private ValidatedContract(T contract, Set<ConstraintViolation<T>> violations, Optional<ValidationException> exception) {
+    private ValidatedContract(T contract, Set<ConstraintViolation<T>> violations, ValidationException exception) {
         this.contract = contract;
         this.violations = violations;
 
@@ -52,8 +51,8 @@ public class ValidatedContract<T> {
                     .append(". ");
             }
         }
-        if (exception.isPresent()) {
-            Throwable rootCause = Throwables.getRootCause(exception.get());
+        if (exception != null) {
+            Throwable rootCause = Throwables.getRootCause(exception);
             sb.append(rootCause.getMessage());
         }
         if (contract == null) {
@@ -65,7 +64,7 @@ public class ValidatedContract<T> {
     }
 
     public boolean isValid() {
-        return violations.isEmpty() && !exception.isPresent();
+        return violations.isEmpty() && exception == null;
     }
 
     public T getContract() {
