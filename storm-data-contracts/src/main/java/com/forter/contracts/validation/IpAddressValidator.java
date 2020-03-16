@@ -10,7 +10,7 @@ import javax.validation.ConstraintValidatorContext;
  * Currently only ipv4 is supported.
  * Returns isValid true if the value is null. Use @NotNull to explicitly reject null values.
  */
-public class IpAddressValidator implements ConstraintValidator<IpAddress, Object> {
+public class IpAddressValidator  implements ConstraintValidator<IpAddress, Object>{
 
     @Override
     public void initialize(IpAddress constraintAnnotation) {

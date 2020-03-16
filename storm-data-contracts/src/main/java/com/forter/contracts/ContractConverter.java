@@ -18,36 +18,37 @@ import java.util.Map;
  */
 public class ContractConverter {
 
-    private final ObjectMapper mapper;
-
-    private ContractConverter() {
-        mapper = new ObjectMapper();
-
-        mapper.setVisibility(mapper
-            .getSerializationConfig()
-            .getDefaultVisibilityChecker()
-            .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-            .withCreatorVisibility(JsonAutoDetect.Visibility.NONE)
-        )
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .registerModule(new GuavaModule().configureAbsentsAsNulls(true))
-            .registerModule(new Jdk8Module().configureAbsentsAsNulls(true));
+    private static class LazyHolder {
+        private static final ContractConverter INSTANCE = new ContractConverter();
     }
 
     public static ContractConverter instance() {
         return LazyHolder.INSTANCE;
     }
 
+    private final ObjectMapper mapper;
+
+    private ContractConverter() {
+        mapper = new ObjectMapper();
+        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        mapper.registerModule(new GuavaModule().configureAbsentsAsNulls(true));
+        mapper.registerModule(new Jdk8Module().configureAbsentsAsNulls(true));
+    }
+
     public <T> T convertObjectNodeToContract(ObjectNode node, ContractFactory<T> factory) throws JsonProcessingException {
-        return updateObjectNodeToContract(node, factory.newInstance());
+        return updateObjectNodeToContract(node,factory.newInstance());
     }
 
     private <T> T updateObjectNodeToContract(ObjectNode node, T defaultValues) throws JsonProcessingException {
         return mapper
-            .readerForUpdating(defaultValues)
-            .treeToValue(node, (Class<? extends T>) defaultValues.getClass());
+                .readerForUpdating(defaultValues)
+                .treeToValue(node, (Class<? extends T>) defaultValues.getClass());
     }
 
     public <T> T convertContractToContract(Object contract, ContractFactory<T> factory) throws JsonProcessingException {
@@ -79,7 +80,4 @@ public class ContractConverter {
         }
     }
 
-    private static class LazyHolder {
-        private static final ContractConverter INSTANCE = new ContractConverter();
-    }
 }

@@ -10,13 +10,14 @@ import java.util.Optional;
  */
 public class NativeOptionalUnwrapper extends TypeResolverBasedValueUnwrapper<Optional<?>> {
 
+
     public NativeOptionalUnwrapper(TypeResolutionHelper typeResolutionHelper) {
         super(typeResolutionHelper);
     }
 
     @Override
     public Object handleValidatedValue(Optional<?> value) {
-        Objects.requireNonNull(value, "Value cannot be null");
+        Objects.requireNonNull(value);
         return value.orElse(null);
     }
 }
