@@ -3,6 +3,9 @@ dist: bionic
 language: java
 jdk:
   - openjdk8
+  - openjdk11
+  - openjdk12
+  - openjdk13
 script:
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V -Pproduction
   - mvn test -B
@@ -19,6 +22,7 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+      jdk: openjdk8
   - provider: s3
     access_key_id:
       secure: "hYgWZsOMIz397lbi5/lwx508hB4EHdn6nauqHYqGJb8WSiM7Gk+d/UkwGR6O4VWBNBjzgYr3wjZj8WG/LpP1SxAOfhefadgLdULGhEPXxzpA4Vmkh84cejB4cVXlocy2j7qih3Yg5DMxvUn2NF9yZMYVKafAkCD9Xc4HUUCXb9A="
@@ -30,6 +34,7 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+      jdk: openjdk8
   - provider: s3
     access_key_id:
       secure: "hYgWZsOMIz397lbi5/lwx508hB4EHdn6nauqHYqGJb8WSiM7Gk+d/UkwGR6O4VWBNBjzgYr3wjZj8WG/LpP1SxAOfhefadgLdULGhEPXxzpA4Vmkh84cejB4cVXlocy2j7qih3Yg5DMxvUn2NF9yZMYVKafAkCD9Xc4HUUCXb9A="
@@ -41,3 +46,4 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+      jdk: openjdk8
