@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.base.Throwables;
 
 import java.util.Collections;
@@ -36,7 +37,8 @@ public class ContractConverter {
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        mapper.registerModule(new GuavaModule());
+        mapper.registerModule(new GuavaModule().configureAbsentsAsNulls(true));
+        mapper.registerModule(new Jdk8Module().configureAbsentsAsNulls(true));
     }
 
     public <T> T convertObjectNodeToContract(ObjectNode node, ContractFactory<T> factory) throws JsonProcessingException {

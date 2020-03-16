@@ -1,6 +1,5 @@
 package com.forter.contracts.validation;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -17,19 +16,19 @@ import java.util.Set;
 public class ValidatedContract<T> {
 
     private final Set<ConstraintViolation<T>> violations;
-    private final Optional<ValidationException> exception;
+    private final ValidationException exception;
     private final T contract;
 
 
     public ValidatedContract(T contract, Set<ConstraintViolation<T>> violations) {
-        this(contract, violations, Optional.<ValidationException>absent());
+        this(contract, violations, null);
     }
 
     public ValidatedContract(T contract, ValidationException e) {
-        this(contract, Sets.<ConstraintViolation<T>>newHashSet(), Optional.of(e));
+        this(contract, Sets.newHashSet(), e);
     }
 
-    private ValidatedContract(T contract, Set<ConstraintViolation<T>> violations, Optional<ValidationException> exception) {
+    private ValidatedContract(T contract, Set<ConstraintViolation<T>> violations, ValidationException exception) {
         this.contract = contract;
         this.violations = violations;
 
@@ -43,31 +42,29 @@ public class ValidatedContract<T> {
         if (isValid()) {
             return "valid contract";
         }
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         if (!violations.isEmpty()) {
             sb.append(violations.size()).append(" contract violations: ");
-            for (final ConstraintViolation violation : violations) {
+            for (final ConstraintViolation<T> violation : violations) {
                 sb.append(violation.getPropertyPath()).append(" is ").append(violation.getInvalidValue())
-                        .append(" but ").append(violation.getMessage())
-                        .append(". ");
+                    .append(" but ").append(violation.getMessage())
+                    .append(". ");
             }
         }
-        if (exception.isPresent()) {
-            Throwable rootCause = Throwables.getRootCause(exception.get());
+        if (exception != null) {
+            Throwable rootCause = Throwables.getRootCause(exception);
             sb.append(rootCause.getMessage());
         }
         if (contract == null) {
             sb.append(" Contract: null");
-        }
-        else {
+        } else {
             sb.append(" Contract:").append(ToStringBuilder.reflectionToString(contract, ToStringStyle.SHORT_PREFIX_STYLE));
         }
-        final String message = sb.toString();
-        return message;
+        return sb.toString();
     }
 
     public boolean isValid() {
-        return violations.isEmpty() && !exception.isPresent();
+        return violations.isEmpty() && exception == null;
     }
 
     public T getContract() {
