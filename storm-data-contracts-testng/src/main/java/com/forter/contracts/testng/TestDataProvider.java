@@ -35,10 +35,11 @@ public class TestDataProvider {
     /**
      * Expects a csv file with headers matching those of the input attributes and output attributes.
      * For example, given an input object with x attribute and output object with y attribute the csv file would be:
-     * <p>
+     *
      * input.x,output.y
      * 1,2
      * 3,4
+     *
      */
     @DataProvider(name = "csv")
     public static Iterator<Object[]> getDataFromCsvFile(Method testMethod) throws IOException {
