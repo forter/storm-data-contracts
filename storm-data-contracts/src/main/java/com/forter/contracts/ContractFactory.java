@@ -13,21 +13,12 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class ContractFactory<T> {
 
-    private final Kryo kryo;
+    private final Kryo kryo = new Kryo();
     private final T newInstance;
+
     public ContractFactory(Class<T> clazz) {
-        this.kryo = new Kryo();
         kryo.register(clazz, new FieldSerializer(kryo, clazz));
         newInstance = createAndInitializeInstance(clazz);
-    }
-
-    public T newInstance() {
-        return kryo.copy(newInstance);
-    }
-    private <T> T createAndInitializeInstance(Class<T> clazz) {
-        T instance = createInstance(clazz);
-        initializeOptionalAsAbsent(instance);
-        return instance;
     }
 
     private static <T> void initializeOptionalAsAbsent(T instance) {
@@ -35,7 +26,7 @@ public class ContractFactory<T> {
         while (clazz != null && clazz != Object.class) {
             Field[] fields = instance.getClass().getDeclaredFields();
             for (Field field : fields) {
-                Class fieldType = field.getType();
+                Class<?> fieldType = field.getType();
                 if (Optional.class.isAssignableFrom(fieldType)) {
                     try {
                         field.setAccessible(true);
@@ -52,8 +43,18 @@ public class ContractFactory<T> {
     private static <T> T createInstance(Class<T> clazz) {
         try {
             return clazz.getConstructor().newInstance();
-        } catch (InstantiationException|IllegalAccessException|InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    public T newInstance() {
+        return kryo.copy(newInstance);
+    }
+
+    private <W> W createAndInitializeInstance(Class<W> clazz) {
+        W instance = createInstance(clazz);
+        initializeOptionalAsAbsent(instance);
+        return instance;
     }
 }

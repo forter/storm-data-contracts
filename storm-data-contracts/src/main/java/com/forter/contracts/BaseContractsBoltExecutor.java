@@ -64,9 +64,9 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
         Preconditions.checkNotNull(this.defaultOutput, "getDefaultOutput cannot return null. Use Optional.absent() instead of null.");
         final ValidatedContract<TOutput> validationResult = ContractValidator.instance().validate(this.defaultOutput);
         Preconditions.checkState(
-                validationResult.isValid(),
-                "Default output failed contract validation: %s",
-                validationResult.toString());
+            validationResult.isValid(),
+            "Default output failed contract validation: %s",
+            validationResult.toString());
         this.isCacheSupported = this.reflector.getInputClass().isAnnotationPresent(Cached.class);
         this.cache = isCacheSupported ? createCacheDAO(stormConf, context) : new DummyCacheDAO<TOutput>();
         this.cacheKeyFilter = new CacheKeyFilter(this.reflector.getInputClass());
@@ -211,8 +211,8 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
      */
     protected List<Object> enrichAttributes(List<Object> update, Tuple originalInput) {
         Map<String, Object> finalAttributes = new HashMap<>();
-        finalAttributes.putAll((Map<String, Object>)originalInput.getValue(1));
-        for (Map.Entry<String, Object> updatedAttribute : ((Map<String, Object>)update.get(1)).entrySet()) {
+        finalAttributes.putAll((Map<String, Object>) originalInput.getValue(1));
+        for (Map.Entry<String, Object> updatedAttribute : ((Map<String, Object>) update.get(1)).entrySet()) {
             if (updatedAttribute.getValue() != null || !finalAttributes.containsKey(updatedAttribute.getKey())) {
                 finalAttributes.put(updatedAttribute.getKey(), updatedAttribute.getValue());
             }
@@ -232,7 +232,7 @@ public class BaseContractsBoltExecutor<TInput, TOutput, TContractsBolt extends I
     private void emit(Object id, Object contract, Tuple originalInput, BasicOutputCollector collector) {
         List<Object> tuple = this.createOutputTuple(id, contract);
 
-        if(this.isEnrichmentBolt) {
+        if (this.isEnrichmentBolt) {
             tuple = this.enrichAttributes(tuple, originalInput);
         }
 
