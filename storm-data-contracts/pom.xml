@@ -6,7 +6,6 @@
         <artifactId>storm-data-contracts-parent</artifactId>
         <groupId>com.forter</groupId>
         <version>0.2.40</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>storm-data-contracts</artifactId>
@@ -66,6 +65,10 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
         <!-- Testing Dependencies -->
         <dependency>

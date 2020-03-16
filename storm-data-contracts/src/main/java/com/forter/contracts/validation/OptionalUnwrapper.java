@@ -6,10 +6,8 @@ import org.hibernate.validator.internal.util.TypeResolutionHelper;
 
 /**
  * Unwraps an {@code Optional} and returns the wrapped value and type.
- *
  */
 public class OptionalUnwrapper extends TypeResolverBasedValueUnwrapper<Optional<?>> {
-
 
     public OptionalUnwrapper(TypeResolutionHelper typeResolutionHelper) {
         super(typeResolutionHelper);
