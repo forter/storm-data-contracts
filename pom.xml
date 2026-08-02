@@ -95,7 +95,19 @@
             </dependencies>
         </profile>
     </profiles>
+    <!-- See https://github.com/forter/build-artifacts-platform/blob/main/docs/package-manager-setup/maven.md -->
     <repositories>
+        <repository>
+            <id>artifactory</id>
+            <name>Forter Artifactory</name>
+            <url>https://artifactory.frdstr.com/artifactory/maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>clojars.org</id>
             <url>http://clojars.org/repo</url>
@@ -110,6 +122,20 @@
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
     </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>artifactory</id>
+            <name>Forter Artifactory</name>
+            <url>https://artifactory.frdstr.com/artifactory/maven</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
