@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <hibernate-validator.version>5.2.3.Final</hibernate-validator.version>
+        <hibernate-validator.version>5.3.6.Final</hibernate-validator.version>
         <jackson.version>2.10.3</jackson.version>
         <storm.version>1.2.2</storm.version>
         <slf4j.version>1.7.7</slf4j.version>
